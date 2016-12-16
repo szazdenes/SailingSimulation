@@ -18,8 +18,11 @@ UI_DIR = ./ui
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    sailingform.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    sailingform.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    sailingform.ui

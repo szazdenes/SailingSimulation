@@ -49,10 +49,14 @@ OBJECTS_DIR   = obj/
 ####### Files
 
 SOURCES       = main.cpp \
-		mainwindow.cpp moc/moc_mainwindow.cpp
+		mainwindow.cpp \
+		sailingform.cpp moc/moc_mainwindow.cpp \
+		moc/moc_sailingform.cpp
 OBJECTS       = obj/main.o \
 		obj/mainwindow.o \
-		obj/moc_mainwindow.o
+		obj/sailingform.o \
+		obj/moc_mainwindow.o \
+		obj/moc_sailingform.o
 DIST          = /home/denes/Qt7/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/common/unix.conf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/common/linux.conf \
@@ -188,6 +192,7 @@ DIST          = /home/denes/Qt7/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/qt_config.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/default_pre.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/resolve_config.prf \
@@ -205,8 +210,10 @@ DIST          = /home/denes/Qt7/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/exceptions.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/yacc.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/lex.prf \
-		SailingSimulation.pro mainwindow.h main.cpp \
-		mainwindow.cpp
+		SailingSimulation.pro mainwindow.h \
+		sailingform.h main.cpp \
+		mainwindow.cpp \
+		sailingform.cpp
 QMAKE_TARGET  = SailingSimulation
 DESTDIR       = bin/
 TARGET        = bin/SailingSimulation
@@ -215,7 +222,7 @@ TARGET        = bin/SailingSimulation
 first: all
 ####### Build rules
 
-$(TARGET): ui/ui_mainwindow.h $(OBJECTS)  
+$(TARGET): ui/ui_mainwindow.h ui/ui_sailingform.h $(OBJECTS)  
 	@test -d bin/ || mkdir -p bin/
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
@@ -354,6 +361,7 @@ Makefile: SailingSimulation.pro /home/denes/Qt7/5.7/gcc_64/mkspecs/linux-g++/qma
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/qt_config.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/default_pre.prf \
 		/home/denes/Qt7/5.7/gcc_64/mkspecs/features/resolve_config.prf \
@@ -511,6 +519,7 @@ Makefile: SailingSimulation.pro /home/denes/Qt7/5.7/gcc_64/mkspecs/linux-g++/qma
 /home/denes/Qt7/5.7/gcc_64/mkspecs/features/qt_config.prf:
 /home/denes/Qt7/5.7/gcc_64/mkspecs/linux-g++/qmake.conf:
 /home/denes/Qt7/5.7/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /home/denes/Qt7/5.7/gcc_64/mkspecs/features/exclusive_builds.prf:
 /home/denes/Qt7/5.7/gcc_64/mkspecs/features/default_pre.prf:
 /home/denes/Qt7/5.7/gcc_64/mkspecs/features/resolve_config.prf:
@@ -546,9 +555,9 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mainwindow.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.ui $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.h sailingform.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mainwindow.cpp sailingform.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.ui sailingform.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -574,9 +583,9 @@ benchmark: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc/moc_mainwindow.cpp
+compiler_moc_header_make_all: moc/moc_mainwindow.cpp moc/moc_sailingform.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc/moc_mainwindow.cpp
+	-$(DEL_FILE) moc/moc_mainwindow.cpp moc/moc_sailingform.cpp
 moc/moc_mainwindow.cpp: /home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QMainWindow \
 		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qmainwindow.h \
 		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qwidget.h \
@@ -681,14 +690,217 @@ moc/moc_mainwindow.cpp: /home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QMainWindow
 		/home/denes/Qt7/5.7/gcc_64/bin/moc
 	/home/denes/Qt7/5.7/gcc_64/bin/moc $(DEFINES) -I/home/denes/Qt7/5.7/gcc_64/mkspecs/linux-g++ -I/home/denes/Documents/Labor/Viking/1000Viking/SailingSimulation -I/home/denes/Qt7/5.7/gcc_64/include -I/home/denes/Qt7/5.7/gcc_64/include/QtWidgets -I/home/denes/Qt7/5.7/gcc_64/include/QtGui -I/home/denes/Qt7/5.7/gcc_64/include/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include mainwindow.h -o moc/moc_mainwindow.cpp
 
+moc/moc_sailingform.cpp: /home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QWidget \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qwidget.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qwindowdefs.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qglobal.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qconfig.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qfeatures.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qtypetraits.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qisenum.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsysinfo.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qlogging.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qflags.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic_msvc.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmutex.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qnumeric.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qversiontagging.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qnamespace.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qwindowdefs_win.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobject.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstring.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qchar.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qbytearray.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qrefcount.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qarraydata.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qlist.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qalgorithms.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qiterator.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qpair.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstringlist.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qregexp.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcoreevent.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmetatype.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobject_impl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmargins.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpaintdevice.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qrect.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsize.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qpoint.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpalette.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qcolor.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qrgb.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qrgba64.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qbrush.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qvector.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qmatrix.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpolygon.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qregion.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qdatastream.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qiodevice.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qline.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qtransform.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpainterpath.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qimage.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpixelformat.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpixmap.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qshareddata.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qhash.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qfont.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qfontmetrics.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qfontinfo.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qsizepolicy.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qcursor.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qkeysequence.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qevent.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qvariant.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmap.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qdebug.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qtextstream.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qlocale.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qset.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qurl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qurlquery.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qfile.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qfiledevice.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qvector2d.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qtouchdevice.h \
+		sailingform.h \
+		/home/denes/Qt7/5.7/gcc_64/bin/moc
+	/home/denes/Qt7/5.7/gcc_64/bin/moc $(DEFINES) -I/home/denes/Qt7/5.7/gcc_64/mkspecs/linux-g++ -I/home/denes/Documents/Labor/Viking/1000Viking/SailingSimulation -I/home/denes/Qt7/5.7/gcc_64/include -I/home/denes/Qt7/5.7/gcc_64/include/QtWidgets -I/home/denes/Qt7/5.7/gcc_64/include/QtGui -I/home/denes/Qt7/5.7/gcc_64/include/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include sailingform.h -o moc/moc_sailingform.cpp
+
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui/ui_mainwindow.h
+compiler_uic_make_all: ui/ui_mainwindow.h ui/ui_sailingform.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui/ui_mainwindow.h
+	-$(DEL_FILE) ui/ui_mainwindow.h ui/ui_sailingform.h
 ui/ui_mainwindow.h: mainwindow.ui \
-		/home/denes/Qt7/5.7/gcc_64/bin/uic
+		/home/denes/Qt7/5.7/gcc_64/bin/uic \
+		sailingform.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QWidget \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qwidget.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qwindowdefs.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qglobal.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qconfig.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qfeatures.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qtypetraits.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qisenum.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsysinfo.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qlogging.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qflags.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic_msvc.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmutex.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qnumeric.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qversiontagging.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qnamespace.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qwindowdefs_win.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobject.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstring.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qchar.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qbytearray.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qrefcount.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qarraydata.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qlist.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qalgorithms.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qiterator.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qpair.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstringlist.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qregexp.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcoreevent.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmetatype.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobject_impl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmargins.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpaintdevice.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qrect.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsize.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qpoint.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpalette.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qcolor.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qrgb.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qrgba64.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qbrush.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qvector.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qmatrix.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpolygon.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qregion.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qdatastream.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qiodevice.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qline.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qtransform.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpainterpath.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qimage.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpixelformat.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpixmap.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qshareddata.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qhash.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qfont.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qfontmetrics.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qfontinfo.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qsizepolicy.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qcursor.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qkeysequence.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qevent.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qvariant.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmap.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qdebug.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qtextstream.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qlocale.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qset.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qurl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qurlquery.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qfile.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qfiledevice.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qvector2d.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qtouchdevice.h
 	/home/denes/Qt7/5.7/gcc_64/bin/uic mainwindow.ui -o ui/ui_mainwindow.h
+
+ui/ui_sailingform.h: sailingform.ui \
+		/home/denes/Qt7/5.7/gcc_64/bin/uic
+	/home/denes/Qt7/5.7/gcc_64/bin/uic sailingform.ui -o ui/ui_sailingform.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -911,11 +1123,153 @@ obj/mainwindow.o: mainwindow.cpp mainwindow.h \
 		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qtouchdevice.h \
 		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qtabwidget.h \
 		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qicon.h \
-		ui/ui_mainwindow.h
+		ui/ui_mainwindow.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/QVariant \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QAction \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qaction.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qactiongroup.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QApplication \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qapplication.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcoreapplication.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qeventloop.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qguiapplication.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qinputmethod.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QButtonGroup \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qbuttongroup.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QHeaderView \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qheaderview.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qframe.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qabstractitemmodel.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qitemselectionmodel.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qvalidator.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qregularexpression.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qslider.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qstyle.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qrubberband.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QMenuBar \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qmenubar.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qmenu.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QStatusBar \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qstatusbar.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QToolBar \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qtoolbar.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QWidget
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/mainwindow.o mainwindow.cpp
+
+obj/sailingform.o: sailingform.cpp sailingform.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/QWidget \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qwidget.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qwindowdefs.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qglobal.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qconfig.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qfeatures.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qtypetraits.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qisenum.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsysinfo.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qlogging.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qflags.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qatomic_msvc.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmutex.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qnumeric.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qversiontagging.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qnamespace.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qwindowdefs_win.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobject.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstring.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qchar.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qbytearray.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qrefcount.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qarraydata.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qlist.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qalgorithms.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qiterator.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qpair.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstringlist.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qregexp.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcoreevent.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmetatype.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qobject_impl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmargins.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpaintdevice.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qrect.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsize.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qpoint.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpalette.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qcolor.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qrgb.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qrgba64.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qbrush.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qvector.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qmatrix.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpolygon.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qregion.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qdatastream.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qiodevice.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qline.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qtransform.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpainterpath.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qimage.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpixelformat.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qpixmap.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qshareddata.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qhash.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qfont.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qfontmetrics.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qfontinfo.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtWidgets/qsizepolicy.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qcursor.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qkeysequence.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qevent.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qvariant.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qmap.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qdebug.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qtextstream.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qlocale.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qset.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qurl.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qurlquery.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qfile.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtCore/qfiledevice.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qvector2d.h \
+		/home/denes/Qt7/5.7/gcc_64/include/QtGui/qtouchdevice.h \
+		ui/ui_sailingform.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/sailingform.o sailingform.cpp
 
 obj/moc_mainwindow.o: moc/moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_mainwindow.o moc/moc_mainwindow.cpp
+
+obj/moc_sailingform.o: moc/moc_sailingform.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_sailingform.o moc/moc_sailingform.cpp
 
 ####### Install
 
