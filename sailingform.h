@@ -23,7 +23,7 @@ private:
     Ui::SailingForm *ui;
     QVector2D getUnitStepVector(double Nerror);
     double getNorthError(int time, int okta);
-
+    QMap<int, double> getTimeElevationMap(QString filename);
     double distance;
 };
 

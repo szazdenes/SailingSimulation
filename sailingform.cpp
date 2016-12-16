@@ -6,6 +6,7 @@ SailingForm::SailingForm(QWidget *parent) :
     ui(new Ui::SailingForm)
 {
     ui->setupUi(this);
+    getTimeElevationMap("../elevation_Bergen_sol.dat");
 }
 
 SailingForm::~SailingForm()
@@ -30,46 +31,66 @@ double SailingForm::getNorthError(int time, int okta)
     if(ui->solRadioButton->isChecked()){
         if(ui->calciteCheckBox->isChecked()){
             if(time <= 12)
-                file.setFileName("./cal_sol_am_ave.csv");
+                file.setFileName("../cal_sol_am_ave.csv");
             if(time > 12)
-                file.setFileName("./cal_sol_pm_ave.csv");
+                file.setFileName("../cal_sol_pm_ave.csv");
         }
         if(ui->cordieriteCheckBox->isChecked()){
             if(time <= 12)
-                file.setFileName("./cord_sol_am_ave.csv");
+                file.setFileName("../cord_sol_am_ave.csv");
             if(time > 12)
-                file.setFileName("./cord_sol_pm_ave.csv");
+                file.setFileName("../cord_sol_pm_ave.csv");
         }
         if(ui->tourmalineCheckBox->isChecked()){
             if(time <= 12)
-                file.setFileName("./tour_sol_am_ave.csv");
+                file.setFileName("../tour_sol_am_ave.csv");
             if(time > 12)
-                file.setFileName("./tour_sol_pm_ave.csv");
+                file.setFileName("../tour_sol_pm_ave.csv");
         }
     }
 
     if(ui->equRadioButton->isChecked()){
         if(ui->calciteCheckBox->isChecked()){
             if(time <= 12)
-                file.setFileName("./cal_equ_am_ave.csv");
+                file.setFileName("../cal_equ_am_ave.csv");
             if(time > 12)
-                file.setFileName("./cal_equ_pm_ave.csv");
+                file.setFileName("../cal_equ_pm_ave.csv");
         }
 
         if(ui->cordieriteCheckBox->isChecked()){
             if(time <= 12)
-                file.setFileName("./cord_equ_am_ave.csv");
+                file.setFileName("../cord_equ_am_ave.csv");
             if(time > 12)
-                file.setFileName("./cord_equ_pm_ave.csv");
+                file.setFileName("../cord_equ_pm_ave.csv");
         }
 
         if(ui->tourmalineCheckBox->isChecked()){
             if(time <= 12)
-                file.setFileName("./tour_equ_am_ave.csv");
+                file.setFileName("../tour_equ_am_ave.csv");
             if(time > 12)
-                file.setFileName("./tour_equ_pm_ave.csv");
+                file.setFileName("../tour_equ_pm_ave.csv");
         }
 
     }
     return northError;
+}
+
+QMap<int, double> SailingForm::getTimeElevationMap(QString filename)
+{
+    QFile file(filename);
+    QMap<int, double> timeElevMap;
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug("Opening error.");
+    }
+    QTextStream stream(&file);
+    stream.readLine();
+    while(!stream.atEnd()){
+        QString line = stream.readLine();
+        QTextStream linestream(&line);
+        int time;
+        double elev;
+        linestream >> time >> elev;
+        timeElevMap[time] = elev;
+    }
+    return timeElevMap;
 }
