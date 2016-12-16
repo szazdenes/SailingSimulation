@@ -37,9 +37,6 @@
      </layout>
     </widget>
    </item>
-   <item row="5" column="1" colspan="2">
-    <widget class="QGraphicsView" name="multipleRunGraphicsView"/>
-   </item>
    <item row="1" column="1">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
@@ -118,10 +115,37 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="1" colspan="2">
-    <widget class="QGraphicsView" name="trajectoryGraphicsView"/>
+   <item row="1" column="3">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Crystal</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="cordieriteCheckBox">
+        <property name="text">
+         <string>Cordierite</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="calciteCheckBox">
+        <property name="text">
+         <string>Calcite</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="tourmalineCheckBox">
+        <property name="text">
+         <string>Tourmaline</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
-   <item row="3" column="1" colspan="2">
+   <item row="3" column="1" colspan="3">
     <widget class="QPushButton" name="startPushButton">
      <property name="minimumSize">
       <size>
@@ -133,6 +157,12 @@
       <string>Start simulation</string>
      </property>
     </widget>
+   </item>
+   <item row="4" column="1" colspan="3">
+    <widget class="QGraphicsView" name="trajectoryGraphicsView"/>
+   </item>
+   <item row="5" column="1" colspan="3">
+    <widget class="QGraphicsView" name="multipleRunGraphicsView"/>
    </item>
   </layout>
  </widget>

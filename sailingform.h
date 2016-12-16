@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QVector2D>
 #include <QtMath>
+#include <QFileDialog>
+#include <QTextStream>
 
 namespace Ui {
 class SailingForm;
@@ -20,6 +22,7 @@ public:
 private:
     Ui::SailingForm *ui;
     QVector2D getUnitStepVector(double Nerror);
+    double getNorthError(int time, int okta);
 
     double distance;
 };
