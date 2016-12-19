@@ -25,7 +25,6 @@ double SailingForm::getNorthError(int time, int okta)
 {
     double northError;
     QMap<int, double> elevationMap, roundedElevationMap;
-//    int roundedElevation = qRound(elevation);
     QFile file;
 
     if(ui->solRadioButton->isChecked()){
@@ -102,6 +101,33 @@ double SailingForm::getNorthError(int time, int okta)
         NErrorMap[keyPair] = NError;
     }
 
+    int roundedElevation;
+    if(roundedElevationMap[time] > 0.0 && roundedElevationMap[time] <= 5.0)
+        roundedElevation = 5;
+    else if(roundedElevationMap[time] > 5 && roundedElevationMap[time] <= 10)
+        roundedElevation = 10;
+    else if(roundedElevationMap[time] > 10 && roundedElevationMap[time] <= 15)
+        roundedElevation = 15;
+    else if(roundedElevationMap[time] > 15 && roundedElevationMap[time] <= 20)
+        roundedElevation = 20;
+    else if(roundedElevationMap[time] > 20 && roundedElevationMap[time] <= 25)
+        roundedElevation = 25;
+    else if(roundedElevationMap[time] > 25 && roundedElevationMap[time] <= 30)
+        roundedElevation = 30;
+    else if(roundedElevationMap[time] > 30 && roundedElevationMap[time] <= 35)
+        roundedElevation = 35;
+    else if(roundedElevationMap[time] > 35 && roundedElevationMap[time] <= 40)
+        roundedElevation = 40;
+    else if(roundedElevationMap[time] > 40 && roundedElevationMap[time] <= 45)
+        roundedElevation = 45;
+    else if(roundedElevationMap[time] > 45 && roundedElevationMap[time] <= 50)
+        roundedElevation = 50;
+    else return -999;
+
+    QPair<int, int> keyPair(roundedElevation, okta);
+
+    northError = NErrorMap[keyPair];
+
     return northError;
 }
 
@@ -127,5 +153,5 @@ QMap<int, double> SailingForm::getTimeElevationMap(QString filename)
 
 void SailingForm::on_startPushButton_clicked()
 {
-    getNorthError(5,2);
+    getNorthError(8,2);
 }
