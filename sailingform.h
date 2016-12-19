@@ -19,6 +19,9 @@ public:
     explicit SailingForm(QWidget *parent = 0);
     ~SailingForm();
 
+private slots:
+    void on_startPushButton_clicked();
+
 private:
     Ui::SailingForm *ui;
     QVector2D getUnitStepVector(double Nerror);

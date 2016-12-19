@@ -6,7 +6,6 @@ SailingForm::SailingForm(QWidget *parent) :
     ui(new Ui::SailingForm)
 {
     ui->setupUi(this);
-    getTimeElevationMap("../elevation_Bergen_sol.dat");
 }
 
 SailingForm::~SailingForm()
@@ -25,6 +24,7 @@ QVector2D SailingForm::getUnitStepVector(double Nerror)
 double SailingForm::getNorthError(int time, int okta)
 {
     double northError;
+    QMap<int, double> elevationMap, roundedElevationMap;
 //    int roundedElevation = qRound(elevation);
     QFile file;
 
@@ -47,6 +47,7 @@ double SailingForm::getNorthError(int time, int okta)
             if(time > 12)
                 file.setFileName("../tour_sol_pm_ave.csv");
         }
+        elevationMap = getTimeElevationMap("../elevation_Bergen_sol.dat");
     }
 
     if(ui->equRadioButton->isChecked()){
@@ -70,8 +71,37 @@ double SailingForm::getNorthError(int time, int okta)
             if(time > 12)
                 file.setFileName("../tour_equ_pm_ave.csv");
         }
-
+        elevationMap = getTimeElevationMap("../elevation_Bergen_equ.dat");
     }
+
+    foreach(int key, elevationMap.keys()){
+        if(ui->solRadioButton->isChecked() && qRound(elevationMap[key]) >= 50)
+            roundedElevationMap[key] = 50.0;
+        else if(ui->equRadioButton->isChecked() && qRound(elevationMap[key]) >= 25)
+            roundedElevationMap[key] = 25.0;
+        else
+            roundedElevationMap[key] = qRound(elevationMap[key]);
+    }
+
+    QMap<QPair<int, int>, double> NErrorMap; /*first:elevation, second:okta*/
+
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug("Opening error.");
+    }
+    QTextStream stream(&file);
+    stream.readLine();
+    while(!stream.atEnd()){
+        QString line = stream.readLine();
+        QTextStream linestream(&line);
+        int elev, cloud;
+        double NError;
+        linestream >> elev >> cloud >> NError;
+        QPair<int, int> keyPair;
+        keyPair.first = elev;
+        keyPair.second = cloud;
+        NErrorMap[keyPair] = NError;
+    }
+
     return northError;
 }
 
@@ -93,4 +123,9 @@ QMap<int, double> SailingForm::getTimeElevationMap(QString filename)
         timeElevMap[time] = elev;
     }
     return timeElevMap;
+}
+
+void SailingForm::on_startPushButton_clicked()
+{
+    getNorthError(5,2);
 }
