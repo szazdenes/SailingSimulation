@@ -6,6 +6,7 @@
 #include <QtMath>
 #include <QFileDialog>
 #include <QTextStream>
+#include <random>
 
 namespace Ui {
 class SailingForm;
@@ -27,6 +28,8 @@ private:
     QVector2D getUnitStepVector(double Nerror);
     double getNorthError(int time, int okta);
     QMap<int, double> getTimeElevationMap(QString filename);
+    int getGaussianRandomNumber(double mu, double sigma);
+    int getUniformRandomNumber(int low, int high);
     double distance;
 };
 

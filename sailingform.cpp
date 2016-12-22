@@ -151,7 +151,50 @@ QMap<int, double> SailingForm::getTimeElevationMap(QString filename)
     return timeElevMap;
 }
 
+int SailingForm::getGaussianRandomNumber(double mu, double sigma) //0,3 works fine
+{
+    double U1, U2, W, mult;
+    static double X1, X2;
+    static int call = 0;
+
+    if (call == 1)
+    {
+        call = !call;
+        return (mu + sigma * (double) X2);
+    }
+
+    do
+    {
+        U1 = -1 + ((double) rand () / RAND_MAX) * 2;
+        U2 = -1 + ((double) rand () / RAND_MAX) * 2;
+        W = pow (U1, 2) + pow (U2, 2);
+    }
+    while (W >= 1 || W == 0);
+
+    mult = sqrt ((-2 * log (W)) / W);
+    X1 = U1 * mult;
+    X2 = U2 * mult;
+
+    call = !call;
+
+    double result = (mu + sigma * (double) X1);
+    double roundedResult = qRound(result);
+    if(roundedResult <= -8)
+        roundedResult = -8;
+    if(roundedResult >= 8)
+        roundedResult = 8;
+
+    return roundedResult;
+}
+
+int SailingForm::getUniformRandomNumber(int low, int high)
+{
+    return qrand() % ((high + 1) - low) + low;
+}
+
 void SailingForm::on_startPushButton_clicked()
 {
-    getNorthError(8,2);
+
+
+
 }
