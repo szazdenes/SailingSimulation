@@ -194,7 +194,35 @@ int SailingForm::getUniformRandomNumber(int low, int high)
 
 void SailingForm::on_startPushButton_clicked()
 {
+    int firstOkta = getUniformRandomNumber(0,8);
+    int currentOkta;
+    int currentTime, startingTime, lengthOfDay;
 
+    if(ui->solRadioButton->isChecked()){
+        startingTime = 3;
+        lengthOfDay = 17;
+    }
+    if(ui->equRadioButton->isChecked()){
+        startingTime = 6;
+        lengthOfDay = 11;
+    }
+
+    currentOkta = firstOkta;
+
+    for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
+        currentTime = startingTime;
+        for(int j = 0; j < lengthOfDay; j++){
+            double NError = getNorthError(currentTime, currentOkta);
+            qDebug("%f\t%d", NError, currentOkta);
+
+            currentTime++;
+            currentOkta += getGaussianRandomNumber(0,3);
+            if(currentOkta <= 0)
+                currentOkta = 0;
+            if(currentOkta >= 8)
+                currentOkta = 8;
+        }
+    }
 
 
 }
