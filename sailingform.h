@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <random>
+#include <QGraphicsView>
 
 namespace Ui {
 class SailingForm;
@@ -25,12 +26,16 @@ private slots:
 
 private:
     Ui::SailingForm *ui;
-    QVector2D getUnitStepVector(double Nerror);
+    QVector2D getUnitStepVector(double Nerror, double speed);
     double getNorthError(int time, int okta);
     QMap<int, double> getTimeElevationMap(QString filename);
     int getGaussianRandomNumber(double mu, double sigma);
     int getUniformRandomNumber(int low, int high);
+    void drawUnitVectors(QList<QVector2D> &vectorList, QPointF startingPoint, double verticalShift);
+    void drawNavigationEndPoint(QList<QVector2D> &vectorList, QPointF startingPoint, double veicalShift);
+
     double distance;
+    QGraphicsScene scene1, scene2;
 };
 
 #endif // SAILINGFORM_H

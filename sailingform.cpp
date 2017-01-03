@@ -6,6 +6,9 @@ SailingForm::SailingForm(QWidget *parent) :
     ui(new Ui::SailingForm)
 {
     ui->setupUi(this);
+
+    ui->trajectoryGraphicsView->setScene(&scene1);
+    ui->multipleRunGraphicsView->setScene(&scene2);
 }
 
 SailingForm::~SailingForm()
@@ -13,11 +16,11 @@ SailingForm::~SailingForm()
     delete ui;
 }
 
-QVector2D SailingForm::getUnitStepVector(double Nerror)
+QVector2D SailingForm::getUnitStepVector(double Nerror, double speed)
 {
     QVector2D result;
-    result.setX(ui->speedDoubleSpinBox->value() * qCos(Nerror * M_PI / 180.0));
-    result.setY(ui->speedDoubleSpinBox->value() * qSin(Nerror * M_PI / 180.0));
+    result.setX(speed * qCos(Nerror * M_PI / 180.0));
+    result.setY(speed * qSin(Nerror * M_PI / 180.0));
     return result;
 }
 
@@ -192,6 +195,30 @@ int SailingForm::getUniformRandomNumber(int low, int high)
     return qrand() % ((high + 1) - low) + low;
 }
 
+void SailingForm::drawUnitVectors(QList<QVector2D> &vectorList, QPointF startingPoint, double verticalShift)
+{
+
+
+    QImage drawImage(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height(), QImage::Format_ARGB32_Premultiplied);
+    QPainter painter(&drawImage);
+    painter.setPen(Qt::black);
+
+    painter.drawLine(QPointF(startingPoint.x(), startingPoint.y() + verticalShift), QPointF(vectorList.at(0).x(), vectorList.at(0).y() + verticalShift));
+
+    QVector2D fromCurrentVector = vectorList.at(0);
+    QVector2D toCurrentVector = vectorList.at(0);
+
+    for(int i = 1; i < vectorList.size(); i++){
+        toCurrentVector += vectorList.at(i);
+        painter.drawLine(QPointF(fromCurrentVector.x(), fromCurrentVector.y() + verticalShift), QPointF(toCurrentVector.x(), toCurrentVector.y() + verticalShift));
+        fromCurrentVector += vectorList.at(i);
+    }
+
+    painter.end();
+    scene1.clear();
+    scene1.addPixmap(QPixmap::fromImage(drawImage));
+}
+
 void SailingForm::on_startPushButton_clicked()
 {
     int firstOkta = getUniformRandomNumber(0,8);
@@ -208,12 +235,15 @@ void SailingForm::on_startPushButton_clicked()
     }
 
     currentOkta = firstOkta;
+    QList<QVector2D> unitStepVectorList;
 
     for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
         currentTime = startingTime;
         for(int j = 0; j < lengthOfDay; j++){
             double NError = getNorthError(currentTime, currentOkta);
-            qDebug("%f\t%d", NError, currentOkta);
+            unitStepVectorList.append(getUnitStepVector(NError, (ui->trajectoryGraphicsView->width()/((double)ui->simLengthSpinBox->value()*17))));
+
+//            qDebug("%f\t%d", NError, currentOkta);
 
             currentTime++;
             currentOkta += getGaussianRandomNumber(0,3);
@@ -223,6 +253,8 @@ void SailingForm::on_startPushButton_clicked()
                 currentOkta = 8;
         }
     }
+
+    drawUnitVectors(unitStepVectorList, QPointF(0, 0), ui->trajectoryGraphicsView->height()/2.0);
 
 
 }
