@@ -264,6 +264,22 @@ void SailingForm::on_startPushButton_clicked()
     QImage trajectoryImage(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height(), QImage::Format_ARGB32_Premultiplied);
     trajectoryImage.fill(Qt::white);
     QColor color;
+    QPainter p1(&endPointImage), p2(&trajectoryImage);
+    QImage background("../terkep.jpg");
+
+    p1.drawImage(0, 0, background);
+    p2.drawImage(0, 0, background);
+
+    p1.end(); p2.end();
+
+  /*  QRectF imageRect = background.rect();
+    QRectF rect1 = ui->trajectoryGraphicsView->viewport()->rect();
+    double fitSize1 = qMin<double>(rect1.width() / imageRect.width(), rect1.height() / imageRect.height());
+    ui->trajectoryGraphicsView->scale(fitSize1, fitSize1);
+    QRectF rect2 = ui->multipleRunGraphicsView->viewport()->rect();
+    double fitSize2 = qMin<double>(rect2.width() / imageRect.width(), rect2.height() / imageRect.height());
+    ui->multipleRunGraphicsView->scale(fitSize2, fitSize2);
+*/
 
     for (int z = 1; z <= 3; z++){
 
