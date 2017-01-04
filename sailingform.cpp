@@ -199,12 +199,12 @@ int SailingForm::getUniformRandomNumber(int low, int high)
     return qrand() % ((high + 1) - low) + low;
 }
 
-void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift)
+void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF shift)
 {
     QPainter painter(&image);
     painter.setPen(color);
 
-    painter.drawLine(QPointF(shift.x() - startingPoint.x(), startingPoint.y() + shift.y()), QPointF(shift.x() - vectorList.at(0).x(), vectorList.at(0).y() + shift.y()));
+    painter.drawLine(QPointF(shift.x(), shift.y()), QPointF(shift.x() - vectorList.at(0).x(), vectorList.at(0).y() + shift.y()));
 
     QVector2D fromCurrentVector = vectorList.at(0);
     QVector2D toCurrentVector = vectorList.at(0);
@@ -219,7 +219,7 @@ void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &
     pen.setColor(Qt::black);
     pen.setWidth(10);
     painter.setPen(pen);
-    painter.drawPoint(shift.x() - startingPoint.x(), startingPoint.y() + shift.y());
+    painter.drawPoint(shift.x(), shift.y());
     pen.setColor(Qt::gray);
     painter.setPen(pen);
     painter.drawPoint(0, shift.y());
@@ -229,7 +229,7 @@ void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &
     scene.addPixmap(QPixmap::fromImage(image));
 }
 
-void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift)
+void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF shift)
 {
     QPainter painter(&image);
     QPen pen;
@@ -247,7 +247,7 @@ void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, Q
     pen.setColor(Qt::black);
     pen.setWidth(10);
     painter.setPen(pen);
-    painter.drawPoint(shift.x() - startingPoint.x(), startingPoint.y() + shift.y());
+    painter.drawPoint(shift.x(), shift.y());
     pen.setColor(Qt::gray);
     painter.setPen(pen);
     painter.drawPoint(0, shift.y());
@@ -309,11 +309,11 @@ void SailingForm::on_startPushButton_clicked()
                 }
             }
             if(!unitStepVectorList.isEmpty())
-                drawNavigationEndPoint(endPointImage, scene2, color, unitStepVectorList, QPointF(0, 0), QPointF(ui->multipleRunGraphicsView->width(), ui->multipleRunGraphicsView->height()/2.0));
+                drawNavigationEndPoint(endPointImage, scene2, color, unitStepVectorList, QPointF(ui->multipleRunGraphicsView->width(), ui->multipleRunGraphicsView->height()/2.0));
             QApplication::processEvents();
         }
         if(!unitStepVectorList.isEmpty())
-            drawUnitVectors(trajectoryImage, scene1, color, unitStepVectorList, QPointF(0, 0), QPointF(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height()/2.0));
+            drawUnitVectors(trajectoryImage, scene1, color, unitStepVectorList, QPointF(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height()/2.0));
 
     }
 

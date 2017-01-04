@@ -33,8 +33,8 @@ private:
     QMap<int, double> getTimeElevationMap(QString filename);
     int getGaussianRandomNumber(double mu, double sigma);
     int getUniformRandomNumber(int low, int high);
-    void drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift); //shift x: horizontal, y: vertical
-    void drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift);
+    void drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF shift); //shift x: horizontal, y: vertical
+    void drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF shift);
 
     double distance;
     QGraphicsScene scene1, scene2;
