@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>670</width>
+    <width>956</width>
     <height>525</height>
    </rect>
   </property>
@@ -67,6 +67,9 @@
        <widget class="QSpinBox" name="simLengthSpinBox">
         <property name="accelerated">
          <bool>true</bool>
+        </property>
+        <property name="minimum">
+         <number>1</number>
         </property>
        </widget>
       </item>

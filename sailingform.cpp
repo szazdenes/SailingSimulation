@@ -195,66 +195,108 @@ int SailingForm::getUniformRandomNumber(int low, int high)
     return qrand() % ((high + 1) - low) + low;
 }
 
-void SailingForm::drawUnitVectors(QList<QVector2D> &vectorList, QPointF startingPoint, double verticalShift)
+void SailingForm::drawUnitVectors(QSize size, QGraphicsScene &scene, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift)
 {
-
-
-    QImage drawImage(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height(), QImage::Format_ARGB32_Premultiplied);
+    QImage drawImage(size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
+    drawImage.fill(Qt::white);
     QPainter painter(&drawImage);
     painter.setPen(Qt::black);
 
-    painter.drawLine(QPointF(startingPoint.x(), startingPoint.y() + verticalShift), QPointF(vectorList.at(0).x(), vectorList.at(0).y() + verticalShift));
+    painter.drawLine(QPointF(shift.x() - startingPoint.x(), startingPoint.y() + shift.y()), QPointF(shift.x() - vectorList.at(0).x(), vectorList.at(0).y() + shift.y()));
 
     QVector2D fromCurrentVector = vectorList.at(0);
     QVector2D toCurrentVector = vectorList.at(0);
 
     for(int i = 1; i < vectorList.size(); i++){
         toCurrentVector += vectorList.at(i);
-        painter.drawLine(QPointF(fromCurrentVector.x(), fromCurrentVector.y() + verticalShift), QPointF(toCurrentVector.x(), toCurrentVector.y() + verticalShift));
+        painter.drawLine(QPointF(shift.x() - fromCurrentVector.x(), fromCurrentVector.y() + shift.y()), QPointF(shift.x() - toCurrentVector.x(), toCurrentVector.y() + shift.y()));
         fromCurrentVector += vectorList.at(i);
     }
 
+    QPen pen;
+    pen.setColor(Qt::blue);
+    pen.setWidth(10);
+    painter.setPen(pen);
+    painter.drawPoint(shift.x() - startingPoint.x(), startingPoint.y() + shift.y());
+    pen.setColor(Qt::green);
+    painter.setPen(pen);
+    painter.drawPoint(0, shift.y());
+
     painter.end();
-    scene1.clear();
-    scene1.addPixmap(QPixmap::fromImage(drawImage));
+    scene.clear();
+    scene.addPixmap(QPixmap::fromImage(drawImage));
+}
+
+void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift)
+{
+    QPainter painter(&image);
+    QPen pen;
+    pen.setColor(Qt::black);
+    pen.setWidth(3);
+    painter.setPen(pen);
+
+    QVector2D toCurrentVector = vectorList.at(0);
+
+    for(int i = 1; i < vectorList.size(); i++)
+        toCurrentVector += vectorList.at(i);
+
+    painter.drawPoint(shift.x() - toCurrentVector.x(), toCurrentVector.y() + shift.y());
+
+    pen.setColor(Qt::blue);
+    pen.setWidth(10);
+    painter.setPen(pen);
+    painter.drawPoint(shift.x() - startingPoint.x(), startingPoint.y() + shift.y());
+    pen.setColor(Qt::green);
+    painter.setPen(pen);
+    painter.drawPoint(0, shift.y());
+
+    painter.end();
+//    scene.clear();
+    scene.addPixmap(QPixmap::fromImage(image));
 }
 
 void SailingForm::on_startPushButton_clicked()
 {
-    int firstOkta = getUniformRandomNumber(0,8);
-    int currentOkta;
-    int currentTime, startingTime, lengthOfDay;
+    QImage endPointImage(ui->multipleRunGraphicsView->width(), ui->multipleRunGraphicsView->height(), QImage::Format_ARGB32_Premultiplied);
+    endPointImage.fill(Qt::white);
 
-    if(ui->solRadioButton->isChecked()){
-        startingTime = 3;
-        lengthOfDay = 17;
-    }
-    if(ui->equRadioButton->isChecked()){
-        startingTime = 6;
-        lengthOfDay = 11;
-    }
-
-    currentOkta = firstOkta;
     QList<QVector2D> unitStepVectorList;
 
-    for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
-        currentTime = startingTime;
-        for(int j = 0; j < lengthOfDay; j++){
-            double NError = getNorthError(currentTime, currentOkta);
-            unitStepVectorList.append(getUnitStepVector(NError, (ui->trajectoryGraphicsView->width()/((double)ui->simLengthSpinBox->value()*17))));
+    for(int i = 0; i < ui->numOfRunsSpinBox->value(); i++){
+        unitStepVectorList.clear();
+        int firstOkta = getUniformRandomNumber(0,8);
+        int currentOkta;
+        int currentTime, startingTime, lengthOfDay;
 
-//            qDebug("%f\t%d", NError, currentOkta);
-
-            currentTime++;
-            currentOkta += getGaussianRandomNumber(0,3);
-            if(currentOkta <= 0)
-                currentOkta = 0;
-            if(currentOkta >= 8)
-                currentOkta = 8;
+        if(ui->solRadioButton->isChecked()){
+            startingTime = 3;
+            lengthOfDay = 17;
         }
+        if(ui->equRadioButton->isChecked()){
+            startingTime = 6;
+            lengthOfDay = 11;
+        }
+
+        currentOkta = firstOkta;
+
+        for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
+            currentTime = startingTime;
+            for(int j = 0; j < lengthOfDay; j++){
+                double NError = getNorthError(currentTime, currentOkta);
+                unitStepVectorList.append(getUnitStepVector(NError, (ui->trajectoryGraphicsView->width()/((double)ui->simLengthSpinBox->value()*17))));
+
+                currentTime++;
+                currentOkta += getGaussianRandomNumber(0,3);
+                if(currentOkta <= 0)
+                    currentOkta = 0;
+                if(currentOkta >= 8)
+                    currentOkta = 8;
+            }
+        }
+
+        drawNavigationEndPoint(endPointImage, scene2, unitStepVectorList, QPointF(0, 0), QPointF(ui->multipleRunGraphicsView->width(), ui->multipleRunGraphicsView->height()/2.0));
+        QApplication::processEvents();
     }
-
-    drawUnitVectors(unitStepVectorList, QPointF(0, 0), ui->trajectoryGraphicsView->height()/2.0);
-
+    drawUnitVectors(QSize(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height()), scene1, unitStepVectorList, QPointF(0, 0), QPointF(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height()/2.0));
 
 }
