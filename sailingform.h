@@ -9,6 +9,8 @@
 #include <random>
 #include <QGraphicsView>
 
+#include "messagedialog.h"
+
 namespace Ui {
 class SailingForm;
 }
@@ -27,12 +29,12 @@ private slots:
 private:
     Ui::SailingForm *ui;
     QVector2D getUnitStepVector(double Nerror, double speed);
-    double getNorthError(int time, int okta);
+    double getNorthError(int time, int okta, int num);
     QMap<int, double> getTimeElevationMap(QString filename);
     int getGaussianRandomNumber(double mu, double sigma);
     int getUniformRandomNumber(int low, int high);
-    void drawUnitVectors(QSize size, QGraphicsScene &scene, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift); //shift x: horizontal, y: vertical
-    void drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift);
+    void drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift); //shift x: horizontal, y: vertical
+    void drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift);
 
     double distance;
     QGraphicsScene scene1, scene2;

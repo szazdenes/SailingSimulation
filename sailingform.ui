@@ -13,30 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="1" column="2">
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Dates</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="1">
-       <widget class="QRadioButton" name="equRadioButton">
-        <property name="text">
-         <string>Equinox</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QRadioButton" name="solRadioButton">
-        <property name="text">
-         <string>Solstice</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
+  <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,2,1,1">
    <item row="1" column="1">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
@@ -161,10 +138,33 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="1" colspan="3">
+   <item row="1" column="2">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Dates</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="1">
+       <widget class="QRadioButton" name="equRadioButton">
+        <property name="text">
+         <string>Equinox</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QRadioButton" name="solRadioButton">
+        <property name="text">
+         <string>Solstice</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="1">
     <widget class="QGraphicsView" name="trajectoryGraphicsView"/>
    </item>
-   <item row="5" column="1" colspan="3">
+   <item row="4" column="2" colspan="2">
     <widget class="QGraphicsView" name="multipleRunGraphicsView"/>
    </item>
   </layout>

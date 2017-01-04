@@ -24,55 +24,59 @@ QVector2D SailingForm::getUnitStepVector(double Nerror, double speed)
     return result;
 }
 
-double SailingForm::getNorthError(int time, int okta)
+double SailingForm::getNorthError(int time, int okta, int num)
 {
     double northError;
     QMap<int, double> elevationMap, roundedElevationMap;
     QFile file;
 
     if(ui->solRadioButton->isChecked()){
-        if(ui->calciteCheckBox->isChecked()){
+        if(ui->calciteCheckBox->isChecked() && num==1){
             if(time <= 12)
                 file.setFileName("../cal_sol_am_ave.csv");
             if(time > 12)
                 file.setFileName("../cal_sol_pm_ave.csv");
         }
-        if(ui->cordieriteCheckBox->isChecked()){
+        else if(ui->cordieriteCheckBox->isChecked() && num==2){
             if(time <= 12)
                 file.setFileName("../cord_sol_am_ave.csv");
             if(time > 12)
                 file.setFileName("../cord_sol_pm_ave.csv");
         }
-        if(ui->tourmalineCheckBox->isChecked()){
+        else if(ui->tourmalineCheckBox->isChecked() && num==3){
             if(time <= 12)
                 file.setFileName("../tour_sol_am_ave.csv");
             if(time > 12)
                 file.setFileName("../tour_sol_pm_ave.csv");
         }
+        else
+            return -999;
         elevationMap = getTimeElevationMap("../elevation_Bergen_sol.dat");
     }
 
     if(ui->equRadioButton->isChecked()){
-        if(ui->calciteCheckBox->isChecked()){
+        if(ui->calciteCheckBox->isChecked() && num==1){
             if(time <= 12)
                 file.setFileName("../cal_equ_am_ave.csv");
             if(time > 12)
                 file.setFileName("../cal_equ_pm_ave.csv");
         }
 
-        if(ui->cordieriteCheckBox->isChecked()){
+        else if(ui->cordieriteCheckBox->isChecked() && num==2){
             if(time <= 12)
                 file.setFileName("../cord_equ_am_ave.csv");
             if(time > 12)
                 file.setFileName("../cord_equ_pm_ave.csv");
         }
 
-        if(ui->tourmalineCheckBox->isChecked()){
+        else if(ui->tourmalineCheckBox->isChecked() && num==3){
             if(time <= 12)
                 file.setFileName("../tour_equ_am_ave.csv");
             if(time > 12)
                 file.setFileName("../tour_equ_pm_ave.csv");
         }
+        else
+            return -999;
         elevationMap = getTimeElevationMap("../elevation_Bergen_equ.dat");
     }
 
@@ -195,12 +199,10 @@ int SailingForm::getUniformRandomNumber(int low, int high)
     return qrand() % ((high + 1) - low) + low;
 }
 
-void SailingForm::drawUnitVectors(QSize size, QGraphicsScene &scene, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift)
+void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift)
 {
-    QImage drawImage(size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
-    drawImage.fill(Qt::white);
-    QPainter painter(&drawImage);
-    painter.setPen(Qt::black);
+    QPainter painter(&image);
+    painter.setPen(color);
 
     painter.drawLine(QPointF(shift.x() - startingPoint.x(), startingPoint.y() + shift.y()), QPointF(shift.x() - vectorList.at(0).x(), vectorList.at(0).y() + shift.y()));
 
@@ -214,24 +216,24 @@ void SailingForm::drawUnitVectors(QSize size, QGraphicsScene &scene, QList<QVect
     }
 
     QPen pen;
-    pen.setColor(Qt::blue);
+    pen.setColor(Qt::black);
     pen.setWidth(10);
     painter.setPen(pen);
     painter.drawPoint(shift.x() - startingPoint.x(), startingPoint.y() + shift.y());
-    pen.setColor(Qt::green);
+    pen.setColor(Qt::gray);
     painter.setPen(pen);
     painter.drawPoint(0, shift.y());
 
     painter.end();
     scene.clear();
-    scene.addPixmap(QPixmap::fromImage(drawImage));
+    scene.addPixmap(QPixmap::fromImage(image));
 }
 
-void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift)
+void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF startingPoint, QPointF shift)
 {
     QPainter painter(&image);
     QPen pen;
-    pen.setColor(Qt::black);
+    pen.setColor(color);
     pen.setWidth(3);
     painter.setPen(pen);
 
@@ -242,11 +244,11 @@ void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, Q
 
     painter.drawPoint(shift.x() - toCurrentVector.x(), toCurrentVector.y() + shift.y());
 
-    pen.setColor(Qt::blue);
+    pen.setColor(Qt::black);
     pen.setWidth(10);
     painter.setPen(pen);
     painter.drawPoint(shift.x() - startingPoint.x(), startingPoint.y() + shift.y());
-    pen.setColor(Qt::green);
+    pen.setColor(Qt::gray);
     painter.setPen(pen);
     painter.drawPoint(0, shift.y());
 
@@ -259,44 +261,62 @@ void SailingForm::on_startPushButton_clicked()
 {
     QImage endPointImage(ui->multipleRunGraphicsView->width(), ui->multipleRunGraphicsView->height(), QImage::Format_ARGB32_Premultiplied);
     endPointImage.fill(Qt::white);
+    QImage trajectoryImage(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height(), QImage::Format_ARGB32_Premultiplied);
+    trajectoryImage.fill(Qt::white);
+    QColor color;
 
-    QList<QVector2D> unitStepVectorList;
+    for (int z = 1; z <= 3; z++){
 
-    for(int i = 0; i < ui->numOfRunsSpinBox->value(); i++){
-        unitStepVectorList.clear();
-        int firstOkta = getUniformRandomNumber(0,8);
-        int currentOkta;
-        int currentTime, startingTime, lengthOfDay;
+        if(z==1)
+            color = Qt::red;
+        if(z==2)
+            color = Qt::green;
+        if(z==3)
+            color = Qt::blue;
 
-        if(ui->solRadioButton->isChecked()){
-            startingTime = 3;
-            lengthOfDay = 17;
-        }
-        if(ui->equRadioButton->isChecked()){
-            startingTime = 6;
-            lengthOfDay = 11;
-        }
+        QList<QVector2D> unitStepVectorList;
 
-        currentOkta = firstOkta;
+        for(int i = 0; i < ui->numOfRunsSpinBox->value(); i++){
+            unitStepVectorList.clear();
+            int firstOkta = getUniformRandomNumber(0,8);
+            int currentOkta;
+            int currentTime, startingTime, lengthOfDay;
 
-        for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
-            currentTime = startingTime;
-            for(int j = 0; j < lengthOfDay; j++){
-                double NError = getNorthError(currentTime, currentOkta);
-                unitStepVectorList.append(getUnitStepVector(NError, (ui->trajectoryGraphicsView->width()/((double)ui->simLengthSpinBox->value()*17))));
-
-                currentTime++;
-                currentOkta += getGaussianRandomNumber(0,3);
-                if(currentOkta <= 0)
-                    currentOkta = 0;
-                if(currentOkta >= 8)
-                    currentOkta = 8;
+            if(ui->solRadioButton->isChecked()){
+                startingTime = 3;
+                lengthOfDay = 17;
             }
+            if(ui->equRadioButton->isChecked()){
+                startingTime = 6;
+                lengthOfDay = 11;
+            }
+
+            currentOkta = firstOkta;
+
+            for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
+                currentTime = startingTime;
+                for(int j = 0; j < lengthOfDay; j++){
+                    double NError = getNorthError(currentTime, currentOkta, z);
+                    if(NError != -999)
+                        unitStepVectorList.append(getUnitStepVector(NError, (ui->trajectoryGraphicsView->width()/((double)ui->simLengthSpinBox->value()*17))));
+
+                    currentTime++;
+                    currentOkta += getGaussianRandomNumber(0,3);
+                    if(currentOkta <= 0)
+                        currentOkta = 0;
+                    if(currentOkta >= 8)
+                        currentOkta = 8;
+                }
+            }
+            if(!unitStepVectorList.isEmpty())
+                drawNavigationEndPoint(endPointImage, scene2, color, unitStepVectorList, QPointF(0, 0), QPointF(ui->multipleRunGraphicsView->width(), ui->multipleRunGraphicsView->height()/2.0));
+            QApplication::processEvents();
         }
+        if(!unitStepVectorList.isEmpty())
+            drawUnitVectors(trajectoryImage, scene1, color, unitStepVectorList, QPointF(0, 0), QPointF(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height()/2.0));
 
-        drawNavigationEndPoint(endPointImage, scene2, unitStepVectorList, QPointF(0, 0), QPointF(ui->multipleRunGraphicsView->width(), ui->multipleRunGraphicsView->height()/2.0));
-        QApplication::processEvents();
     }
-    drawUnitVectors(QSize(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height()), scene1, unitStepVectorList, QPointF(0, 0), QPointF(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height()/2.0));
 
+    MessageDialog messDialog("Simulation ready");
+    messDialog.exec();
 }
