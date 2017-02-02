@@ -60,7 +60,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Speed</string>
+         <string>Speed (km/h)</string>
         </property>
        </widget>
       </item>
