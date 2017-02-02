@@ -257,29 +257,39 @@ void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, Q
     scene.addPixmap(QPixmap::fromImage(image));
 }
 
+void SailingForm::fitImage(QImage &image, QGraphicsView *view)
+{
+
+    QRectF imageRect = image.rect();
+    QRectF rect = view->viewport()->rect();
+    double fitSize = qMin<double>(rect.width() / imageRect.width(), rect.height() / imageRect.height());
+
+    QMatrix matrix = view->matrix().inverted();
+    QRectF visibleRect = matrix.mapRect(view->viewport()->rect());
+    double zoom = qMin<double>(visibleRect.width() / rect.width(), visibleRect.height() / rect.height());
+    zoom *= fitSize;
+
+    view->scale(zoom, zoom);
+}
+
 void SailingForm::on_startPushButton_clicked()
 {
-    QImage endPointImage(ui->multipleRunGraphicsView->width(), ui->multipleRunGraphicsView->height(), QImage::Format_ARGB32_Premultiplied);
+    QImage background("../terkep.jpg");
+    QImage endPointImage(background.size(), QImage::Format_ARGB32);
     endPointImage.fill(Qt::white);
-    QImage trajectoryImage(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height(), QImage::Format_ARGB32_Premultiplied);
+    QImage trajectoryImage(background.size(), QImage::Format_ARGB32);
     trajectoryImage.fill(Qt::white);
     QColor color;
     QPainter p1(&endPointImage), p2(&trajectoryImage);
-    QImage background("../terkep.jpg");
 
     p1.drawImage(0, 0, background);
     p2.drawImage(0, 0, background);
 
     p1.end(); p2.end();
 
-  /*  QRectF imageRect = background.rect();
-    QRectF rect1 = ui->trajectoryGraphicsView->viewport()->rect();
-    double fitSize1 = qMin<double>(rect1.width() / imageRect.width(), rect1.height() / imageRect.height());
-    ui->trajectoryGraphicsView->scale(fitSize1, fitSize1);
-    QRectF rect2 = ui->multipleRunGraphicsView->viewport()->rect();
-    double fitSize2 = qMin<double>(rect2.width() / imageRect.width(), rect2.height() / imageRect.height());
-    ui->multipleRunGraphicsView->scale(fitSize2, fitSize2);
-*/
+    fitImage(background, ui->trajectoryGraphicsView);
+    fitImage(background, ui->multipleRunGraphicsView);
+
 
     for (int z = 1; z <= 3; z++){
 
@@ -314,7 +324,7 @@ void SailingForm::on_startPushButton_clicked()
                 for(int j = 0; j < lengthOfDay; j++){
                     double NError = getNorthError(currentTime, currentOkta, z);
                     if(NError != -999)
-                        unitStepVectorList.append(getUnitStepVector(NError, (ui->trajectoryGraphicsView->width()/((double)ui->simLengthSpinBox->value()*17))));
+                        unitStepVectorList.append(getUnitStepVector(NError, (trajectoryImage.width()/((double)ui->simLengthSpinBox->value()*17))));
 
                     currentTime++;
                     currentOkta += getGaussianRandomNumber(0,3);
@@ -325,11 +335,11 @@ void SailingForm::on_startPushButton_clicked()
                 }
             }
             if(!unitStepVectorList.isEmpty())
-                drawNavigationEndPoint(endPointImage, scene2, color, unitStepVectorList, QPointF(ui->multipleRunGraphicsView->width(), ui->multipleRunGraphicsView->height()/2.0));
+                drawNavigationEndPoint(endPointImage, scene2, color, unitStepVectorList, QPointF(endPointImage.width(), endPointImage.height()/2.0));
             QApplication::processEvents();
         }
         if(!unitStepVectorList.isEmpty())
-            drawUnitVectors(trajectoryImage, scene1, color, unitStepVectorList, QPointF(ui->trajectoryGraphicsView->width(), ui->trajectoryGraphicsView->height()/2.0));
+            drawUnitVectors(trajectoryImage, scene1, color, unitStepVectorList, QPointF(trajectoryImage.width(), trajectoryImage.height()/2.0));
 
     }
 
