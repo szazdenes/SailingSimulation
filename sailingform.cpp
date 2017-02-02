@@ -222,7 +222,7 @@ void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &
     painter.drawPoint(shift.x(), shift.y());
     pen.setColor(Qt::gray);
     painter.setPen(pen);
-    painter.drawPoint(0, shift.y());
+    painter.drawPoint(165.0, shift.y());
 
     painter.end();
     scene.clear();
@@ -250,7 +250,7 @@ void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, Q
     painter.drawPoint(shift.x(), shift.y());
     pen.setColor(Qt::gray);
     painter.setPen(pen);
-    painter.drawPoint(0, shift.y());
+    painter.drawPoint(165.0, shift.y());
 
     painter.end();
 //    scene.clear();
@@ -319,12 +319,14 @@ void SailingForm::on_startPushButton_clicked()
 
             currentOkta = firstOkta;
 
+            double lengthOfVectorList = qAbs(trajectoryImage.width()-(1-601.0/trajectoryImage.width())*trajectoryImage.width() - 165.0);
+
             for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
                 currentTime = startingTime;
                 for(int j = 0; j < lengthOfDay; j++){
                     double NError = getNorthError(currentTime, currentOkta, z);
                     if(NError != -999)
-                        unitStepVectorList.append(getUnitStepVector(NError, (trajectoryImage.width()/((double)ui->simLengthSpinBox->value()*17))));
+                        unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/((double)ui->simLengthSpinBox->value()*17))));
 
                     currentTime++;
                     currentOkta += getGaussianRandomNumber(0,3);
@@ -335,11 +337,11 @@ void SailingForm::on_startPushButton_clicked()
                 }
             }
             if(!unitStepVectorList.isEmpty())
-                drawNavigationEndPoint(endPointImage, scene2, color, unitStepVectorList, QPointF(endPointImage.width(), endPointImage.height()/2.0));
+                drawNavigationEndPoint(endPointImage, scene2, color, unitStepVectorList, QPointF(endPointImage.width()-(1-601.0/endPointImage.width())*endPointImage.width(), endPointImage.height()-(1-332.0/endPointImage.height())*endPointImage.height()));
             QApplication::processEvents();
         }
         if(!unitStepVectorList.isEmpty())
-            drawUnitVectors(trajectoryImage, scene1, color, unitStepVectorList, QPointF(trajectoryImage.width(), trajectoryImage.height()/2.0));
+            drawUnitVectors(trajectoryImage, scene1, color, unitStepVectorList, QPointF(trajectoryImage.width()-(1-601.0/trajectoryImage.width())*trajectoryImage.width(), trajectoryImage.height()-(1-332.0/trajectoryImage.height())*trajectoryImage.height()));
 
     }
 
