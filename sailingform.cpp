@@ -300,6 +300,7 @@ void SailingForm::on_startPushButton_clicked()
     fitImage(background, ui->multipleRunGraphicsView);
 
     double lengthOfVectorList = qAbs(trajectoryImage.width()-(1-601.0/trajectoryImage.width())*trajectoryImage.width() - 165.0);
+    double voyageTime = distance/ui->speedDoubleSpinBox->value();
 
     for (int z = 1; z <= 3; z++){
 
@@ -321,7 +322,7 @@ void SailingForm::on_startPushButton_clicked()
             if(ui->solRadioButton->isChecked()){
                 startingTime = 3;
                 lengthOfDay = 17;
-                ui->speedDoubleSpinBox->setValue(distance/(ui->simLengthSpinBox->value()*lengthOfDay));
+//                ui->speedDoubleSpinBox->setValue(distance/(ui->simLengthSpinBox->value()*lengthOfDay));
             }
             if(ui->equRadioButton->isChecked()){
                 startingTime = 6;
@@ -335,7 +336,7 @@ void SailingForm::on_startPushButton_clicked()
                 for(int j = 0; j < lengthOfDay; j++){
                     double NError = getNorthError(currentTime, currentOkta, z);
                     if(NError != -999)
-                        unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/((double)ui->simLengthSpinBox->value()*17))));
+                        unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/voyageTime))); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
                     currentTime++;
                     currentOkta += getGaussianRandomNumber(0,3);
                     if(currentOkta <= 0)
