@@ -20,11 +20,13 @@ UI_DIR = ./ui
 SOURCES += main.cpp\
         mainwindow.cpp \
     sailingform.cpp \
-    messagedialog.cpp
+    messagedialog.cpp \
+    contourrecognition.cpp
 
 HEADERS  += mainwindow.h \
     sailingform.h \
-    messagedialog.h
+    messagedialog.h \
+    contourrecognition.h
 
 FORMS    += mainwindow.ui \
     sailingform.ui \

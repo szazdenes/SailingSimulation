@@ -11,6 +11,11 @@ SailingForm::SailingForm(QWidget *parent) :
     ui->multipleRunGraphicsView->setScene(&scene2);
 
     distance = 2720; //km
+
+    ContourRecognition contour;
+    QImage contourImage = contour.getContour("../terkep.jpg");
+    QImage blownUpContourImage = contour.blowUpContour(contourImage);
+    blownUpContourImage.save("../contour.png");
 }
 
 SailingForm::~SailingForm()

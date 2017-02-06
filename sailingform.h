@@ -10,6 +10,7 @@
 #include <QGraphicsView>
 
 #include "messagedialog.h"
+#include "contourrecognition.h"
 
 namespace Ui {
 class SailingForm;
