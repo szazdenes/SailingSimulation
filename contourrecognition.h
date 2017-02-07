@@ -14,6 +14,7 @@ public:
     QImage getContour(QString imagePath);
     QImage blowUpContour(QImage &image);
     QPointF blownPoint(double x, double y, double blow);
+    void skeletonize(int posX, int posY, QImage &image);
 
 signals:
 

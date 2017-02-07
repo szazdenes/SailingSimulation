@@ -31,6 +31,12 @@ QImage ContourRecognition::getContour(QString imagePath)
             }
         }
 
+        for(int k = 1; k < outImage.width()-1; k+=3){
+            for(int l = 1; l < outImage.height()-1; l+=3){
+                skeletonize(k,l, outImage);
+            }
+        }
+
         return outImage;
     }
     else
@@ -78,5 +84,29 @@ QPointF ContourRecognition::blownPoint(double x, double y, double blow)
     blown.setX((sqrt((x*x+y*y)) + blow)*(x/(sqrt((x*x+y*y)))));
     blown.setY((sqrt((x*x+y*y)) + blow)*(y/(sqrt((x*x+y*y)))));
     return blown;
+}
+
+void ContourRecognition::skeletonize(int posX, int posY, QImage &image)
+{
+    double num = 0;
+    double xPos = 0, yPos = 0;
+
+    for(int i = posX-1; i <= posX+1; i++){
+        for(int j = posY-1; j <= posY+1; j++){
+            if(image.pixelColor(i,j) != Qt::white){
+                xPos += i;
+                yPos += j;
+                num++;
+            }
+            image.setPixelColor(i,j, Qt::white);
+        }
+    }
+
+    if(num != 0){
+        xPos /= num;
+        yPos /= num;
+        QPoint result(qRound(xPos), qRound(yPos));
+        image.setPixelColor(result, Qt::black);
+    }
 }
 
