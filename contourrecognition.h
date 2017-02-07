@@ -15,6 +15,7 @@ public:
     QImage blowUpContour(QImage &image);
     QPointF blownPoint(double x, double y, double blow);
     void skeletonize(int posX, int posY, QImage &image);
+    QList<QPoint> getNeighbourList(QImage &image);
 
 signals:
 

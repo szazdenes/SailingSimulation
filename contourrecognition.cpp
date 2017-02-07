@@ -33,7 +33,7 @@ QImage ContourRecognition::getContour(QString imagePath)
 
         for(int k = 1; k < outImage.width()-1; k+=3){
             for(int l = 1; l < outImage.height()-1; l+=3){
-                skeletonize(k,l, outImage);
+                skeletonize(k, l, outImage);
             }
         }
 
@@ -108,5 +108,10 @@ void ContourRecognition::skeletonize(int posX, int posY, QImage &image)
         QPoint result(qRound(xPos), qRound(yPos));
         image.setPixelColor(result, Qt::black);
     }
+}
+
+QList<QPoint> ContourRecognition::getNeighbourList(QImage &image)
+{
+
 }
 
