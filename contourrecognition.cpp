@@ -213,7 +213,7 @@ QList<QPointF> ContourRecognition::scaleDataToImage(QString dataPath, QImage &im
         scaledList.append(scaled);
     }
 
-    qDebug("%f %f %f %f", xmax-xmin, ymax-ymin, xmin, ymax);
+//    qDebug("%f %f %f %f", xmax-xmin, ymax-ymin, xmin, ymax);
     return scaledList;
 }
 

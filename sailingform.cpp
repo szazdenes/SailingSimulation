@@ -12,14 +12,14 @@ SailingForm::SailingForm(QWidget *parent) :
 
     distance = 2720; //km
 
-    QImage contourImage = contour.getContour("../terkep.jpg");
-    QImage blownUpContourImage = contour.blowUpContour(contourImage);
-    blownUpContourImage.save("../contour.png");
+//    QImage contourImage = contour.getContour("../terkep.jpg");
+//    QImage blownUpContourImage = contour.blowUpContour(contourImage);
+//    blownUpContourImage.save("../contour.png");
 
     /*delete later*/
-    for(int i = 0; i <= 16; i++){
-        qDebug("%f", contour.blowDistance(6372797, 1000, 1000, i));
-    }
+//    for(int i = 0; i <= 16; i++){
+//        qDebug("%f", contour.blowDistance(6372797, 1000, 1000, i));
+//    }
 
 //    selectVikingRoute("../world.dat", "../terkep.dat");
 
