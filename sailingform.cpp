@@ -12,10 +12,18 @@ SailingForm::SailingForm(QWidget *parent) :
 
     distance = 2720; //km
 
-    ContourRecognition contour;
     QImage contourImage = contour.getContour("../terkep.jpg");
     QImage blownUpContourImage = contour.blowUpContour(contourImage);
     blownUpContourImage.save("../contour.png");
+
+    /*delete later*/
+    for(int i = 0; i <= 16; i++){
+        qDebug("%f", contour.blowDistance(6372797, 1000, 1000, i));
+    }
+
+//    selectVikingRoute("../world.dat", "../terkep.dat");
+
+    QImage im;
 }
 
 SailingForm::~SailingForm()
@@ -286,9 +294,42 @@ void SailingForm::fitImage(QImage &image, QGraphicsView *view)
     view->scale(zoom, zoom);
 }
 
+void SailingForm::selectVikingRoute(QString inpath, QString outpath)
+{
+    QFile file(inpath);
+    QFile outfile(outpath);
+
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+            qDebug("Opening error.");
+        }
+
+    if(!outfile.open(QIODevice::WriteOnly | QIODevice::Text)){
+            qDebug("Opening error.");
+        }
+    QTextStream stream(&file), out(&outfile);
+    double x, y;
+
+    while(!stream.atEnd()){
+        QString line = stream.readLine();
+        QTextStream linestream(&line);
+        linestream >> x >> y;
+        if(x > -68 && x < 19 && y < 84 && y > 50)
+            out << x << "\t" << y << "\n";
+    }
+
+    file.close();
+    outfile.close();
+}
+
 void SailingForm::on_startPushButton_clicked()
 {
-    QImage background("../terkep.jpg");
+    QImage background(QSize(800, 600), QImage::Format_ARGB32);
+    background.fill(Qt::white);
+    QList<QPointF> backgroundPoints = contour.scaleDataToImage("../terkep.dat", background);
+    for(int i = 0; i < backgroundPoints.size(); i++){
+        background.setPixelColor(QPoint(qRound(backgroundPoints.at(i).x()), qRound(backgroundPoints.at(i).y())), Qt::black);
+    }
+
     QImage endPointImage(background.size(), QImage::Format_ARGB32);
     endPointImage.fill(Qt::white);
     QImage trajectoryImage(background.size(), QImage::Format_ARGB32);

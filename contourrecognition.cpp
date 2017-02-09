@@ -20,7 +20,7 @@ QImage ContourRecognition::getContour(QString imagePath)
 
         int wMin = 50;
         int wMax = 280;
-        int hMin = 230;
+        int hMin = 280;
         int hMax = 340;
 
         for(int i = 0; i < image.width(); i++){
@@ -71,6 +71,8 @@ QImage ContourRecognition::blowUpContour(QImage &image)
             }
         }
 
+        QList<QPoint> neighbour = getNeighbourList(image);
+
         outImage.setPixelColor(qRound(weightPoint.x()), qRound(weightPoint.y()), Qt::yellow);
         return outImage;
     }
@@ -112,6 +114,119 @@ void ContourRecognition::skeletonize(int posX, int posY, QImage &image)
 
 QList<QPoint> ContourRecognition::getNeighbourList(QImage &image)
 {
+    QList<QVector2D> pixelVector;
 
+    for(int i = 0; i < image.height(); i++){
+        for(int j = 0; j < image.width(); j++){
+            if(image.pixelColor(j,i) != Qt::white)
+                pixelVector.append(QVector2D(j,i));
+        }
+    }
+
+    QMap<int, double> minDistanceMap;
+    QList<QVector2D> neighbourVector;
+
+    neighbourVector.append(pixelVector.at(0));
+
+    for(int l = 0; l < pixelVector.size(); l++){
+        for(int k = l; k < pixelVector.size(); k++){
+            double dist = (pixelVector.at(k) - neighbourVector.last()).length();
+            if(dist != 0 /*&& dist < 10*/)
+                minDistanceMap[k] = dist;
+        }
+
+        QList<double> distanceList;
+
+        foreach(double current, minDistanceMap.values())
+            distanceList.append(current);
+
+        qSort(distanceList);
+
+        foreach(double current, distanceList){
+            QVector2D currentVector = pixelVector.at(minDistanceMap.key(current));
+            if(!neighbourVector.contains(currentVector)){
+                neighbourVector.append(currentVector);
+                break;
+            }
+        }
+    }
+
+    QList<QPoint> neighbourList;
+
+    QImage neighbourImage(image.size(), QImage::Format_ARGB32);
+    neighbourImage.fill(Qt::white);
+
+    QPainter painter(&neighbourImage);
+    painter.setPen(Qt::red);
+
+    foreach(QVector2D current, neighbourVector)
+        neighbourList.append(QPoint(qRound(current.x()), qRound(current.y())));
+
+
+    for(int i = 0; i < neighbourList.size()-1; i++){
+        painter.drawLine(neighbourList.at(i), neighbourList.at(i+1));
+        neighbourImage.setPixelColor(neighbourList.at(i), Qt::black);
+
+    }
+
+    neighbourImage.save("../neighbour.png");
+
+    return neighbourList;
+
+
+}
+
+QList<QPointF> ContourRecognition::scaleDataToImage(QString dataPath, QImage &image)
+{
+    QList<QPointF> dataList;
+    QList<double> xList, yList;
+    QFile file(dataPath);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug("Opening error.");
+    }
+    double x, y, xmin, xmax, ymin, ymax;
+    QTextStream stream(&file);
+    while(!stream.atEnd()){
+        QString line = stream.readLine();
+        QTextStream linestream(&line);
+        linestream >> x >> y;
+        dataList.append(QPointF(x, y));
+        xList.append(x);
+        yList.append(y);
+    }
+
+    file.close();
+
+    qSort(xList);
+    qSort(yList);
+    xmin = xList.first();
+    xmax = xList.last();
+    ymin = yList.first();
+    ymax = yList.last();
+
+    QList<QPointF> scaledList;
+
+    foreach(QPointF current, dataList){
+        QPointF scaled;
+        scaled.setX((image.width()/qAbs(xmax-xmin))*(current.x() - xmin));
+        scaled.setY(-1*(image.height()/qAbs(ymax-ymin))*(current.y() - ymax));
+        scaledList.append(scaled);
+    }
+
+    qDebug("%f %f", xmax-xmin, ymax-ymin);
+    return scaledList;
+}
+
+double ContourRecognition::blowDistance(double R, double s, double H, double h)
+{
+    double distance;
+    double phi, theta;
+
+    phi = acos(R/(R+H));
+    theta = acos(R/(R+h));
+
+    distance = R*(phi+theta) - s;
+
+    return distance;
 }
 
