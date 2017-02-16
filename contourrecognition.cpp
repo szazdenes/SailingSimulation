@@ -10,82 +10,68 @@ ContourRecognition::~ContourRecognition()
 
 }
 
-QImage ContourRecognition::getContour(QString imagePath)
+QList<QPointF> ContourRecognition::blowUpContour(QList<QPointF> &dataList, double blow, QImage &image)
 {
-    if(!imagePath.isEmpty() && !imagePath.isNull()){
-        QImage image(imagePath);
-        QColor color;
-        QImage outImage(image.size(), QImage::Format_ARGB32);
-        outImage.fill(Qt::white);
+//    QVector2D centroid(0,0);
+//    double num = 0;
 
-        int wMin = 50;
-        int wMax = 280;
-        int hMin = 280;
-        int hMax = 340;
+//    foreach(QPointF current, dataList){
+//        centroid.setX(centroid.x()+current.x());
+//        centroid.setY(centroid.y()+current.y());
+//        num++;
+//    }
+//    centroid.setX(centroid.x() / num);
+//    centroid.setY(centroid.y() /num);
 
-        for(int i = 0; i < image.width(); i++){
-            for(int j = 0; j < image.height(); j++){
-                color = image.pixelColor(i, j);
-                if(color.blackF() > 0.3 && i > wMin && i < wMax && j > hMin && j < hMax)
-                    outImage.setPixelColor(i, j, color);
-            }
-        }
+    QList<QPointF> blownList;
 
-        for(int k = 1; k < outImage.width()-1; k+=3){
-            for(int l = 1; l < outImage.height()-1; l+=3){
-                skeletonize(k, l, outImage);
-            }
-        }
+    QVector3D normal1, normal2;
+    for(int i = 0; i < dataList.size()-1; i++){
+        QVector3D halfPoint((dataList.at(i).x()+dataList.at(i+1).x())/2.0, (dataList.at(i).y()+dataList.at(i+1).y())/2.0, 0.0);
+        normal1.setX(dataList.at(i+1).y() - dataList.at(i).y());
+        normal1.setY(-1*(dataList.at(i+1).x() - dataList.at(i).x()));
+        normal1.setZ(0);
+        normal1.normalize();
+        normal2.setX(-1*(dataList.at(i+1).y() - dataList.at(i).y()));
+        normal2.setY(dataList.at(i+1).x() - dataList.at(i).x());
+        normal2.setZ(0);
+        normal2.normalize();
 
-        return outImage;
+        QVector3D distVector(dataList.at(i+1).x() - dataList.at(i).x(), dataList.at(i+1).y() - dataList.at(i).y(), 0);
+        QVector3D scalar1 = QVector3D::crossProduct(distVector, normal1).normalized();
+        QVector3D scalar2 = QVector3D::crossProduct(distVector, normal2).normalized();
+
+        if(scalar1.z() < 0)
+            blownList.append(QPointF(halfPoint.x() + blow*normal1.x(), halfPoint.y() + blow*normal1.y()));
+        if(scalar2.z() < 0)
+            blownList.append(QPointF(halfPoint.x() + blow*normal2.x(), halfPoint.y() + blow*normal2.y()));
     }
-    else
-        return QImage(NULL);
-}
 
-QImage ContourRecognition::blowUpContour(QImage &image)
-{
-    if(!image.isNull()){
-        QImage outImage = image;
-        QPointF weightPoint(0,0);
-        double num;
+//    QVector3D intersect1, intersect2;
 
-        for(int i = 0; i < image.width(); i++){
-            for(int j = 0; j < image.height(); j++){
-                if(image.pixelColor(i,j) != Qt::white){
-                    weightPoint.setX(weightPoint.x() + i);
-                    weightPoint.setY(weightPoint.y() + j);
-                    num++;
-                }
-            }
-        }
-        weightPoint.setX(weightPoint.x() / num);
-        weightPoint.setY(weightPoint.y() / num);
+//    for(int i = 0; i < dataList.size()-1; i++){
+//        double dist = (QVector2D(dataList.at(i+1).x(), dataList.at(i+1).y()) - QVector2D(dataList.at(i).x(), dataList.at(i).y())).length();
+//        if(sqrt(4*blow*blow/(dist*dist) - 1) > 0){
+//            intersect1.setX(1/2.0*(dataList.at(i).x()+dataList.at(i+1).x()) + 1/2.0*sqrt((4*blow*blow)/(dist*dist) - 1)*(dataList.at(i+1).y()-dataList.at(i).y()));
+//            intersect1.setY(1/2.0*(dataList.at(i).y()+dataList.at(i+1).y()) + 1/2.0*sqrt((4*blow*blow)/(dist*dist) - 1)*(dataList.at(i).x()-dataList.at(i+1).x()));
+//            intersect1.setZ(0);
+//            intersect2.setX(1/2.0*(dataList.at(i).x()+dataList.at(i+1).x()) - 1/2.0*sqrt((4*blow*blow)/(dist*dist) - 1)*(dataList.at(i+1).y()-dataList.at(i).y()));
+//            intersect2.setY(1/2.0*(dataList.at(i).y()+dataList.at(i+1).y()) - 1/2.0*sqrt((4*blow*blow)/(dist*dist) - 1)*(dataList.at(i).x()-dataList.at(i+1).x()));
+//            intersect2.setZ(0);
 
-        for(double k = 0; k < image.width(); k++){
-            for(double l = 0; l < image.height(); l++){
-                if(image.pixelColor((int)k,(int)l) != Qt::white){
-                    QPointF currentBlown = blownPoint(k-weightPoint.x(), l-weightPoint.y(), 10);
-                    outImage.setPixelColor(qRound(currentBlown.x() + weightPoint.x()), qRound(currentBlown.y() + weightPoint.y()), Qt::magenta);
-                }
-            }
-        }
+//            QVector3D distVector(dataList.at(i+1).x() - dataList.at(i).x(), dataList.at(i+1).y() - dataList.at(i).y(), 0);
 
-        QList<QPoint> neighbour = getNeighbourList(image);
+//            QVector3D scalar1 = QVector3D::crossProduct(distVector, intersect1).normalized();
+//            QVector3D scalar2 = QVector3D::crossProduct(distVector, intersect2).normalized();
 
-        outImage.setPixelColor(qRound(weightPoint.x()), qRound(weightPoint.y()), Qt::yellow);
-        return outImage;
-    }
-    else
-        return QImage(NULL);
-}
+//            if((centroid - intersect1).length() >= (centroid - intersect2).length())
+//                blownList.append(QPointF(intersect1.x(), intersect1.y()));
+//            else
+//                blownList.append(QPointF(intersect2.x(), intersect2.y()));
+//        }
+//    }
 
-QPointF ContourRecognition::blownPoint(double x, double y, double blow)
-{
-    QPointF blown;
-    blown.setX((sqrt((x*x+y*y)) + blow)*(x/(sqrt((x*x+y*y)))));
-    blown.setY((sqrt((x*x+y*y)) + blow)*(y/(sqrt((x*x+y*y)))));
-    return blown;
+    return blownList;
 }
 
 void ContourRecognition::skeletonize(int posX, int posY, QImage &image)
@@ -110,70 +96,6 @@ void ContourRecognition::skeletonize(int posX, int posY, QImage &image)
         QPoint result(qRound(xPos), qRound(yPos));
         image.setPixelColor(result, Qt::black);
     }
-}
-
-QList<QPoint> ContourRecognition::getNeighbourList(QImage &image)
-{
-    QList<QVector2D> pixelVector;
-
-    for(int i = 0; i < image.height(); i++){
-        for(int j = 0; j < image.width(); j++){
-            if(image.pixelColor(j,i) != Qt::white)
-                pixelVector.append(QVector2D(j,i));
-        }
-    }
-
-    QMap<int, double> minDistanceMap;
-    QList<QVector2D> neighbourVector;
-
-    neighbourVector.append(pixelVector.at(0));
-
-    for(int l = 0; l < pixelVector.size(); l++){
-        for(int k = l; k < pixelVector.size(); k++){
-            double dist = (pixelVector.at(k) - neighbourVector.last()).length();
-            if(dist != 0 /*&& dist < 10*/)
-                minDistanceMap[k] = dist;
-        }
-
-        QList<double> distanceList;
-
-        foreach(double current, minDistanceMap.values())
-            distanceList.append(current);
-
-        qSort(distanceList);
-
-        foreach(double current, distanceList){
-            QVector2D currentVector = pixelVector.at(minDistanceMap.key(current));
-            if(!neighbourVector.contains(currentVector)){
-                neighbourVector.append(currentVector);
-                break;
-            }
-        }
-    }
-
-    QList<QPoint> neighbourList;
-
-    QImage neighbourImage(image.size(), QImage::Format_ARGB32);
-    neighbourImage.fill(Qt::white);
-
-    QPainter painter(&neighbourImage);
-    painter.setPen(Qt::red);
-
-    foreach(QVector2D current, neighbourVector)
-        neighbourList.append(QPoint(qRound(current.x()), qRound(current.y())));
-
-
-    for(int i = 0; i < neighbourList.size()-1; i++){
-        painter.drawLine(neighbourList.at(i), neighbourList.at(i+1));
-        neighbourImage.setPixelColor(neighbourList.at(i), Qt::black);
-
-    }
-
-    neighbourImage.save("../neighbour.png");
-
-    return neighbourList;
-
-
 }
 
 QList<QPointF> ContourRecognition::scaleDataToImage(QString dataPath, QImage &image)
@@ -215,6 +137,27 @@ QList<QPointF> ContourRecognition::scaleDataToImage(QString dataPath, QImage &im
 
 //    qDebug("%f %f %f %f", xmax-xmin, ymax-ymin, xmin, ymax);
     return scaledList;
+}
+
+QList<QPointF> ContourRecognition::scaleContour(QString dataPath, QImage &image)
+{
+    QList<QPointF> dataList;
+    QList<double> xList, yList;
+    QFile file(dataPath);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug("Opening error.");
+    }
+    double x, y;
+    QTextStream stream(&file);
+    while(!stream.atEnd()){
+        QString line = stream.readLine();
+        QTextStream linestream(&line);
+        linestream >> x >> y;
+        dataList.append(QPointF((image.width()/86.98)*(x - (-67.989)), -1*(image.height()/33.59)*(y - 83.599)));
+    }
+
+    file.close();
+    return dataList;
 }
 
 double ContourRecognition::blowDistance(double R, double s, double H, double h)

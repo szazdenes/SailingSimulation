@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QtMath>
 #include <QVector2D>
+#include <QVector3D>
 #include <QMap>
 #include <QPainter>
 #include <QFile>
@@ -17,13 +18,10 @@ public:
     explicit ContourRecognition(QObject *parent = 0);
     ~ContourRecognition();
 
-    QImage getContour(QString imagePath);
-    QImage blowUpContour(QImage &image);
-    QPointF blownPoint(double x, double y, double blow);
+    QList<QPointF> blowUpContour(QList<QPointF> &dataList, double blow, QImage &image);
     void skeletonize(int posX, int posY, QImage &image);
-    QList<QPoint> getNeighbourList(QImage &image);
-
     QList<QPointF> scaleDataToImage(QString dataPath, QImage &image);
+    QList<QPointF> scaleContour(QString dataPath, QImage &image);
     double blowDistance(double R, double s, double H, double h);
 
 signals:

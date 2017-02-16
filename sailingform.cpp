@@ -12,18 +12,11 @@ SailingForm::SailingForm(QWidget *parent) :
 
     distance = 2720; //km
 
-//    QImage contourImage = contour.getContour("../terkep.jpg");
-//    QImage blownUpContourImage = contour.blowUpContour(contourImage);
-//    blownUpContourImage.save("../contour.png");
-
     /*delete later*/
 //    for(int i = 0; i <= 16; i++){
 //        qDebug("%f", contour.blowDistance(6372797, 1000, 1000, i));
 //    }
 
-//    selectVikingRoute("../world.dat", "../terkep.dat");
-
-    QImage im;
 }
 
 SailingForm::~SailingForm()
@@ -329,6 +322,17 @@ void SailingForm::on_startPushButton_clicked()
     for(int i = 0; i < backgroundPoints.size(); i++){
         background.setPixelColor(QPoint(qRound(backgroundPoints.at(i).x()), qRound(backgroundPoints.at(i).y())), Qt::black);
     }
+
+    double blowDist = contour.blowDistance(6372797, 1000, 1000, 16); //needs to be scaled
+    QList<QPointF> contourPoints = contour.scaleContour("../contour.dat", background);
+    QList<QPointF> blownContour = contour.blowUpContour(contourPoints, 100, background);
+    QPainter painter(&background);
+    painter.setPen(Qt::magenta);
+    for(int i = 0; i < blownContour.size()-1; i++){
+        background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
+        painter.drawLine(contourPoints.at(i), contourPoints.at(i+1));
+    }
+    painter.end();
 
     QImage endPointImage(background.size(), QImage::Format_ARGB32);
     endPointImage.fill(Qt::white);
