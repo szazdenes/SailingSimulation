@@ -28,7 +28,7 @@ QVector2D SailingForm::getUnitStepVector(double Nerror, double speed)
 {
     QVector2D result;
     result.setX(speed * qCos(Nerror * M_PI / 180.0));
-    result.setY(speed * qSin(Nerror * M_PI / 180.0));
+    result.setY(-1*speed * qSin(Nerror * M_PI / 180.0));
     return result;
 }
 
@@ -323,9 +323,19 @@ void SailingForm::on_startPushButton_clicked()
         background.setPixelColor(QPoint(qRound(backgroundPoints.at(i).x()), qRound(backgroundPoints.at(i).y())), Qt::black);
     }
 
+    QImage endPointImage(background.size(), QImage::Format_ARGB32);
+    endPointImage.fill(Qt::white);
+    QImage trajectoryImage(background.size(), QImage::Format_ARGB32);
+    trajectoryImage.fill(Qt::white);
+    QColor color;
+    QPainter p1(&endPointImage), p2(&trajectoryImage);
+
+    double lengthOfVectorList = qAbs((trajectoryImage.width()/86.98)*(5.3 - (-67.989)) - (trajectoryImage.width()/86.98)*(-42.7 - (-67.989)));
     double blowDist = contour.blowDistance(6372797, 1000, 1000, 16); //needs to be scaled
+    double blowDistPixel = blowDist*lengthOfVectorList/(distance*1000);
+
     QList<QPointF> contourPoints = contour.scaleContour("../contour.dat", background);
-    QList<QPointF> blownContour = contour.blowUpContour(contourPoints, 100, background);
+    QList<QPointF> blownContour = contour.blowUpContour(contourPoints, blowDistPixel, background);
     QPainter painter(&background);
     painter.setPen(Qt::magenta);
     for(int i = 0; i < blownContour.size()-1; i++){
@@ -333,13 +343,6 @@ void SailingForm::on_startPushButton_clicked()
         painter.drawLine(contourPoints.at(i), contourPoints.at(i+1));
     }
     painter.end();
-
-    QImage endPointImage(background.size(), QImage::Format_ARGB32);
-    endPointImage.fill(Qt::white);
-    QImage trajectoryImage(background.size(), QImage::Format_ARGB32);
-    trajectoryImage.fill(Qt::white);
-    QColor color;
-    QPainter p1(&endPointImage), p2(&trajectoryImage);
 
     p1.drawImage(0, 0, background);
     p2.drawImage(0, 0, background);
@@ -349,7 +352,6 @@ void SailingForm::on_startPushButton_clicked()
     fitImage(background, ui->trajectoryGraphicsView);
     fitImage(background, ui->multipleRunGraphicsView);
 
-    double lengthOfVectorList = qAbs((trajectoryImage.width()/86.98)*(5.3 - (-67.989)) - (trajectoryImage.width()/86.98)*(-42.7 - (-67.989)));
     double voyageTime = distance/ui->speedDoubleSpinBox->value();
 
     for (int z = 1; z <= 3; z++){
