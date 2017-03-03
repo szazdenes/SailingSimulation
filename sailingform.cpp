@@ -40,22 +40,43 @@ double SailingForm::getNorthError(int time, int okta, int num)
 
     if(ui->solRadioButton->isChecked()){
         if(ui->calciteCheckBox->isChecked() && num==1){
-            if(time <= 12)
+            if(time < 12)
                 file.setFileName("../cal_sol_am_ave.csv");
             if(time > 12)
                 file.setFileName("../cal_sol_pm_ave.csv");
+            if(time == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    file.setFileName("../cal_sol_am_ave.csv");
+                if(randNum == 1)
+                    file.setFileName("../cal_sol_pm_ave.csv");
+            }
         }
         else if(ui->cordieriteCheckBox->isChecked() && num==2){
-            if(time <= 12)
+            if(time < 12)
                 file.setFileName("../cord_sol_am_ave.csv");
             if(time > 12)
                 file.setFileName("../cord_sol_pm_ave.csv");
+            if(time == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    file.setFileName("../cord_sol_am_ave.csv");
+                if(randNum == 1)
+                    file.setFileName("../cord_sol_pm_ave.csv");
+            }
         }
         else if(ui->tourmalineCheckBox->isChecked() && num==3){
-            if(time <= 12)
+            if(time < 12)
                 file.setFileName("../tour_sol_am_ave.csv");
             if(time > 12)
                 file.setFileName("../tour_sol_pm_ave.csv");
+            if(time == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    file.setFileName("../tour_sol_am_ave.csv");
+                if(randNum == 1)
+                    file.setFileName("../tour_sol_pm_ave.csv");
+            }
         }
         else
             return -999;
@@ -64,24 +85,45 @@ double SailingForm::getNorthError(int time, int okta, int num)
 
     if(ui->equRadioButton->isChecked()){
         if(ui->calciteCheckBox->isChecked() && num==1){
-            if(time <= 12)
+            if(time < 12)
                 file.setFileName("../cal_equ_am_ave.csv");
             if(time > 12)
                 file.setFileName("../cal_equ_pm_ave.csv");
+            if(time == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    file.setFileName("../cal_equ_am_ave.csv");
+                if(randNum == 1)
+                    file.setFileName("../cal_equ_pm_ave.csv");
+            }
         }
 
         else if(ui->cordieriteCheckBox->isChecked() && num==2){
-            if(time <= 12)
+            if(time < 12)
                 file.setFileName("../cord_equ_am_ave.csv");
             if(time > 12)
                 file.setFileName("../cord_equ_pm_ave.csv");
+            if(time == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    file.setFileName("../cord_equ_am_ave.csv");
+                if(randNum == 1)
+                    file.setFileName("../cord_equ_pm_ave.csv");
+            }
         }
 
         else if(ui->tourmalineCheckBox->isChecked() && num==3){
-            if(time <= 12)
+            if(time < 12)
                 file.setFileName("../tour_equ_am_ave.csv");
             if(time > 12)
                 file.setFileName("../tour_equ_pm_ave.csv");
+            if(time == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    file.setFileName("../tour_equ_am_ave.csv");
+                if(randNum == 1)
+                    file.setFileName("../tour_equ_pm_ave.csv");
+            }
         }
         else
             return -999;
@@ -386,7 +428,7 @@ void SailingForm::on_startPushButton_clicked()
             for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
                 currentTime = startingTime;
                 for(int j = 0; j < lengthOfDay; j++){
-                    if(j%1 == 0)
+                    if(j%ui->hourIntervalSpinBox->value() == 0)
                         NError = getNorthError(currentTime, currentOkta, z);
                     if(NError != -999)
                         unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/voyageTime))); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days

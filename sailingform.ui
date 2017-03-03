@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>956</width>
+    <width>1004</width>
     <height>525</height>
    </rect>
   </property>
@@ -27,7 +27,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="1" column="3">
        <widget class="QSpinBox" name="numOfRunsSpinBox">
         <property name="accelerated">
          <bool>true</bool>
@@ -78,7 +78,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
+      <item row="0" column="3">
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
@@ -89,6 +89,30 @@
         </property>
         <property name="text">
          <string>Number of runs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QSpinBox" name="hourIntervalSpinBox">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>20</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_2">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Orienting interval (hour)</string>
         </property>
        </widget>
       </item>
