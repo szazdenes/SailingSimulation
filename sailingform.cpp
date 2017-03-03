@@ -252,7 +252,10 @@ int SailingForm::getUniformRandomNumber(int low, int high)
 void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF shift)
 {
     QPainter painter(&image);
-    painter.setPen(color);
+    QPen pen;
+    pen.setStyle(Qt::SolidLine);
+    pen.setColor(color);
+    painter.setPen(pen);
 
     painter.drawLine(QPointF(shift.x(), shift.y()), QPointF(shift.x() - vectorList.at(0).x(), vectorList.at(0).y() + shift.y()));
 
@@ -273,7 +276,6 @@ void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &
 
 //    qDebug("%f %f", sumLength, sumdifflength);
 
-    QPen pen;
     pen.setColor(Qt::black);
     pen.setWidth(10);
     painter.setPen(pen);
