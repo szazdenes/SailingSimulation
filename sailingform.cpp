@@ -382,10 +382,12 @@ void SailingForm::on_startPushButton_clicked()
 
             currentOkta = firstOkta;
 
+            double NError;
             for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
                 currentTime = startingTime;
                 for(int j = 0; j < lengthOfDay; j++){
-                    double NError = getNorthError(currentTime, currentOkta, z);
+                    if(j%1 == 0)
+                        NError = getNorthError(currentTime, currentOkta, z);
                     if(NError != -999)
                         unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/voyageTime))); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
                     currentTime++;
