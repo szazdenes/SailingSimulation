@@ -41,41 +41,41 @@ double SailingForm::getNorthError(int time, int okta, int num)
     if(ui->solRadioButton->isChecked()){
         if(ui->calciteCheckBox->isChecked() && num==1){
             if(time < 12)
-                file.setFileName("../cal_sol_am_ave.csv");
+                file.setFileName("../cal_sol_am.csv");
             if(time > 12)
-                file.setFileName("../cal_sol_pm_ave.csv");
+                file.setFileName("../cal_sol_pm.csv");
             if(time == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
-                    file.setFileName("../cal_sol_am_ave.csv");
+                    file.setFileName("../cal_sol_am.csv");
                 if(randNum == 1)
-                    file.setFileName("../cal_sol_pm_ave.csv");
+                    file.setFileName("../cal_sol_pm.csv");
             }
         }
         else if(ui->cordieriteCheckBox->isChecked() && num==2){
             if(time < 12)
-                file.setFileName("../cord_sol_am_ave.csv");
+                file.setFileName("../cord_sol_am.csv");
             if(time > 12)
-                file.setFileName("../cord_sol_pm_ave.csv");
+                file.setFileName("../cord_sol_pm.csv");
             if(time == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
-                    file.setFileName("../cord_sol_am_ave.csv");
+                    file.setFileName("../cord_sol_am.csv");
                 if(randNum == 1)
-                    file.setFileName("../cord_sol_pm_ave.csv");
+                    file.setFileName("../cord_sol_pm.csv");
             }
         }
         else if(ui->tourmalineCheckBox->isChecked() && num==3){
             if(time < 12)
-                file.setFileName("../tour_sol_am_ave.csv");
+                file.setFileName("../tour_sol_am.csv");
             if(time > 12)
-                file.setFileName("../tour_sol_pm_ave.csv");
+                file.setFileName("../tour_sol_pm.csv");
             if(time == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
-                    file.setFileName("../tour_sol_am_ave.csv");
+                    file.setFileName("../tour_sol_am.csv");
                 if(randNum == 1)
-                    file.setFileName("../tour_sol_pm_ave.csv");
+                    file.setFileName("../tour_sol_pm.csv");
             }
         }
         else
@@ -86,43 +86,43 @@ double SailingForm::getNorthError(int time, int okta, int num)
     if(ui->equRadioButton->isChecked()){
         if(ui->calciteCheckBox->isChecked() && num==1){
             if(time < 12)
-                file.setFileName("../cal_equ_am_ave.csv");
+                file.setFileName("../cal_equ_am.csv");
             if(time > 12)
-                file.setFileName("../cal_equ_pm_ave.csv");
+                file.setFileName("../cal_equ_pm.csv");
             if(time == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
-                    file.setFileName("../cal_equ_am_ave.csv");
+                    file.setFileName("../cal_equ_am.csv");
                 if(randNum == 1)
-                    file.setFileName("../cal_equ_pm_ave.csv");
+                    file.setFileName("../cal_equ_pm.csv");
             }
         }
 
         else if(ui->cordieriteCheckBox->isChecked() && num==2){
             if(time < 12)
-                file.setFileName("../cord_equ_am_ave.csv");
+                file.setFileName("../cord_equ_am.csv");
             if(time > 12)
-                file.setFileName("../cord_equ_pm_ave.csv");
+                file.setFileName("../cord_equ_pm.csv");
             if(time == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
-                    file.setFileName("../cord_equ_am_ave.csv");
+                    file.setFileName("../cord_equ_am.csv");
                 if(randNum == 1)
-                    file.setFileName("../cord_equ_pm_ave.csv");
+                    file.setFileName("../cord_equ_pm.csv");
             }
         }
 
         else if(ui->tourmalineCheckBox->isChecked() && num==3){
             if(time < 12)
-                file.setFileName("../tour_equ_am_ave.csv");
+                file.setFileName("../tour_equ_am.csv");
             if(time > 12)
-                file.setFileName("../tour_equ_pm_ave.csv");
+                file.setFileName("../tour_equ_pm.csv");
             if(time == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
-                    file.setFileName("../tour_equ_am_ave.csv");
+                    file.setFileName("../tour_equ_am.csv");
                 if(randNum == 1)
-                    file.setFileName("../tour_equ_pm_ave.csv");
+                    file.setFileName("../tour_equ_pm.csv");
             }
         }
         else
@@ -139,7 +139,7 @@ double SailingForm::getNorthError(int time, int okta, int num)
             roundedElevationMap[key] = qRound(elevationMap[key]);
     }
 
-    QMap<QPair<int, int>, double> NErrorMap; /*first:elevation, second:okta*/
+    QMap<QPair<int, int>, QList<double>> NErrorMap; /*first:elevation, second:okta*/
 
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
         qDebug("Opening error.");
@@ -155,7 +155,7 @@ double SailingForm::getNorthError(int time, int okta, int num)
         QPair<int, int> keyPair;
         keyPair.first = elev;
         keyPair.second = cloud;
-        NErrorMap[keyPair] = NError;
+        NErrorMap[keyPair].append(NError);
     }
 
     int roundedElevation;
@@ -183,7 +183,8 @@ double SailingForm::getNorthError(int time, int okta, int num)
 
     QPair<int, int> keyPair(roundedElevation, okta);
 
-    northError = NErrorMap[keyPair];
+    double NErrorNum = getUniformRandomNumber(0, NErrorMap[keyPair].size()-1);
+    northError = NErrorMap[keyPair].at(NErrorNum);
 
     return northError;
 }
@@ -249,7 +250,7 @@ int SailingForm::getUniformRandomNumber(int low, int high)
     return qrand() % ((high + 1) - low) + low;
 }
 
-void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF shift)
+void SailingForm::drawUnitVectors(QImage &image, QColor &color, QList<QVector2D> &vectorList, QPointF shift)
 {
     QPainter painter(&image);
     QPen pen;
@@ -285,11 +286,9 @@ void SailingForm::drawUnitVectors(QImage &image, QGraphicsScene &scene, QColor &
     painter.drawPoint((image.width()/86.98)*(-42.7 - (-67.989)), shift.y());
 
     painter.end();
-    scene.clear();
-    scene.addPixmap(QPixmap::fromImage(image));
 }
 
-void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, QColor &color, QList<QVector2D> &vectorList, QPointF shift)
+void SailingForm::drawNavigationEndPoint(QImage &image, QColor &color, QList<QVector2D> &vectorList, QPointF shift)
 {
     QPainter painter(&image);
     QPen pen;
@@ -313,7 +312,6 @@ void SailingForm::drawNavigationEndPoint(QImage &image, QGraphicsScene &scene, Q
     painter.drawPoint((image.width()/86.98)*(-42.7 - (-67.989)), shift.y());
 
     painter.end();
-    scene.addPixmap(QPixmap::fromImage(image));
 }
 
 void SailingForm::fitImage(QImage &image, QGraphicsView *view)
@@ -442,14 +440,19 @@ void SailingForm::on_startPushButton_clicked()
                         currentOkta = 8;
                 }
             }
-            if(!unitStepVectorList.isEmpty())
-                drawNavigationEndPoint(endPointImage, scene2, color, unitStepVectorList, QPointF((endPointImage.width()/86.98)*(5.3 - (-67.989)), -1*(endPointImage.height()/33.59)*(61 - 83.599)));
-            QApplication::processEvents();
+            if(!unitStepVectorList.isEmpty()){
+                drawNavigationEndPoint(endPointImage, color, unitStepVectorList, QPointF((endPointImage.width()/86.98)*(5.3 - (-67.989)), -1*(endPointImage.height()/33.59)*(61 - 83.599)));
+                drawUnitVectors(trajectoryImage, color, unitStepVectorList, QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599)));
+
+//                QApplication::processEvents();
+            }
         }
-        if(!unitStepVectorList.isEmpty())
-            drawUnitVectors(trajectoryImage, scene1, color, unitStepVectorList, QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599)));
 
     }
+    ui->multipleRunGraphicsView->scene()->clear();
+    ui->multipleRunGraphicsView->scene()->addPixmap(QPixmap::fromImage(endPointImage));
+    ui->trajectoryGraphicsView->scene()->clear();
+    ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
 
 //    qDebug("%f %f", sumLength, lengthOfVectorList);
 
