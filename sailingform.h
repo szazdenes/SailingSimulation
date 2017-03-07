@@ -8,9 +8,6 @@
 #include <QTextStream>
 #include <random>
 #include <QGraphicsView>
-#include <QThread>
-#include <QFuture>
-#include <QtConcurrent/QtConcurrent>
 
 #include "messagedialog.h"
 #include "contourrecognition.h"

@@ -358,10 +358,7 @@ void SailingForm::selectVikingRoute(QString inpath, QString outpath)
 
 void SailingForm::on_startPushButton_clicked()
 {
-    MessageDialog messDialog("Simulation in progress");
-
-    messDialog.exec();
-    messDialog.accepted();
+//    MessageDialog messDialog("Simulation in progress");
 
     QImage background(QSize(800, 600), QImage::Format_ARGB32);
     background.fill(Qt::white);
