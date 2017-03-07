@@ -358,6 +358,11 @@ void SailingForm::selectVikingRoute(QString inpath, QString outpath)
 
 void SailingForm::on_startPushButton_clicked()
 {
+    MessageDialog messDialog("Simulation in progress");
+
+    messDialog.exec();
+    messDialog.accepted();
+
     QImage background(QSize(800, 600), QImage::Format_ARGB32);
     background.fill(Qt::white);
     QList<QPointF> backgroundPoints = contour.scaleDataToImage("../terkep.dat", background);
@@ -444,7 +449,7 @@ void SailingForm::on_startPushButton_clicked()
                 drawNavigationEndPoint(endPointImage, color, unitStepVectorList, QPointF((endPointImage.width()/86.98)*(5.3 - (-67.989)), -1*(endPointImage.height()/33.59)*(61 - 83.599)));
                 drawUnitVectors(trajectoryImage, color, unitStepVectorList, QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599)));
 
-//                QApplication::processEvents();
+                QApplication::processEvents();
             }
         }
 
@@ -453,9 +458,4 @@ void SailingForm::on_startPushButton_clicked()
     ui->multipleRunGraphicsView->scene()->addPixmap(QPixmap::fromImage(endPointImage));
     ui->trajectoryGraphicsView->scene()->clear();
     ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
-
-//    qDebug("%f %f", sumLength, lengthOfVectorList);
-
-    MessageDialog messDialog("Simulation ready");
-    messDialog.exec();
 }
