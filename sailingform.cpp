@@ -12,6 +12,9 @@ SailingForm::SailingForm(QWidget *parent) :
 
     distance = 2720; //km
 
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "Good" << "Wrong" << "Success (%)");
+
     /*delete later*/
 //    for(int i = 0; i <= 16; i++){
 //        qDebug("%f", contour.blowDistance(6372797, 1000, 1000, i));
@@ -275,8 +278,6 @@ void SailingForm::drawUnitVectors(QImage &image, QColor &color, QList<QVector2D>
         sumLength+=vectorList.at(i).length();
     }
 
-//    qDebug("%f %f", sumLength, sumdifflength);
-
     pen.setColor(Qt::black);
     pen.setWidth(10);
     painter.setPen(pen);
@@ -400,15 +401,17 @@ void SailingForm::on_startPushButton_clicked()
 
     for (int z = 1; z <= 3; z++){
 
-        if(z==1)
-            color = Qt::red;
-        if(z==2)
-            color = Qt::green;
-        if(z==3)
-            color = Qt::blue;
+//        if(z==1)
+//            color = Qt::red;
+//        if(z==2)
+//            color = Qt::green;
+//        if(z==3)
+//            color = Qt::blue;
 
         QList<QVector2D> unitStepVectorList;
 
+        double resultedNError = -999;
+        double good = 0, wrong = 0;
         for(int i = 0; i < ui->numOfRunsSpinBox->value(); i++){
             unitStepVectorList.clear();
             int firstOkta = getUniformRandomNumber(0,8);
@@ -427,13 +430,17 @@ void SailingForm::on_startPushButton_clicked()
             currentOkta = firstOkta;
 
             double NError;
+            double sumNELengthX = 0, sumNELengthY = 0;
             for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
                 currentTime = startingTime;
                 for(int j = 0; j < lengthOfDay; j++){
                     if(j%ui->hourIntervalSpinBox->value() == 0)
                         NError = getNorthError(currentTime, currentOkta, z);
-                    if(NError != -999)
+                    if(NError != -999){
+                        sumNELengthX += cos(NError*M_PI/180.0);
+                        sumNELengthY += sin(NError*M_PI/180.0);
                         unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/voyageTime))); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
+                    }
                     currentTime++;
                     currentOkta += getGaussianRandomNumber(0,3);
                     if(currentOkta <= 0)
@@ -442,6 +449,22 @@ void SailingForm::on_startPushButton_clicked()
                         currentOkta = 8;
                 }
             }
+
+
+            if(sumNELengthY > 0)
+                resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+            else
+                resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+
+            if(resultedNError < -5 && resultedNError != -999){
+                color = Qt::red;
+                wrong++;
+            }
+            if(resultedNError >= -5 && resultedNError != -999){
+                color = Qt::green;
+                good++;
+            }
+
             if(!unitStepVectorList.isEmpty()){
                 drawNavigationEndPoint(endPointImage, color, unitStepVectorList, QPointF((endPointImage.width()/86.98)*(5.3 - (-67.989)), -1*(endPointImage.height()/33.59)*(61 - 83.599)));
                 drawUnitVectors(trajectoryImage, color, unitStepVectorList, QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599)));
@@ -450,9 +473,18 @@ void SailingForm::on_startPushButton_clicked()
             }
         }
 
+        if(resultedNError != -999 && z==3){
+            double success = 100*good/(good+wrong);
+            ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 0, new QTableWidgetItem(QString::number(good)));
+            ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 1, new QTableWidgetItem(QString::number(wrong)));
+            ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 2, new QTableWidgetItem(QString::number(success)));
+        }
     }
     ui->multipleRunGraphicsView->scene()->clear();
     ui->multipleRunGraphicsView->scene()->addPixmap(QPixmap::fromImage(endPointImage));
     ui->trajectoryGraphicsView->scene()->clear();
     ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
+
+    trajectoryImage.save("trajectory.png");
+    endPointImage.save("endpoint.png");
 }
