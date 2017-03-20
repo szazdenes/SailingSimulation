@@ -15,11 +15,6 @@ SailingForm::SailingForm(QWidget *parent) :
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "Good" << "Wrong" << "Success (%)");
 
-    /*delete later*/
-//    for(int i = 0; i <= 16; i++){
-//        qDebug("%f", contour.blowDistance(6372797, 1000, 1000, i));
-//    }
-
 }
 
 SailingForm::~SailingForm()
@@ -212,7 +207,7 @@ QMap<int, double> SailingForm::getTimeElevationMap(QString filename)
     return timeElevMap;
 }
 
-int SailingForm::getGaussianRandomNumber(double mu, double sigma) //0,3 works fine
+int SailingForm::getGaussianRandomNumber(double mu, double sigma, QString mode) //0,3 works fine, mode: nav, cloud
 {
     double U1, U2, W, mult;
     static double X1, X2;
@@ -240,10 +235,18 @@ int SailingForm::getGaussianRandomNumber(double mu, double sigma) //0,3 works fi
 
     double result = (mu + sigma * (double) X1);
     double roundedResult = qRound(result);
-    if(roundedResult <= -8)
-        roundedResult = -8;
-    if(roundedResult >= 8)
-        roundedResult = 8;
+
+    if(mode == "cloud"){
+        if(roundedResult <= -8)
+            roundedResult = -8;
+        if(roundedResult >= 8)
+            roundedResult = 8;
+    }
+
+    if(mode == "nav"){
+        if(roundedResult <= 1)
+            roundedResult = 1;
+    }
 
     return roundedResult;
 }
@@ -359,7 +362,7 @@ void SailingForm::selectVikingRoute(QString inpath, QString outpath)
 
 void SailingForm::on_startPushButton_clicked()
 {
-//    MessageDialog messDialog("Simulation in progress");
+
 
     QImage background(QSize(800, 600), QImage::Format_ARGB32);
     background.fill(Qt::white);
@@ -430,19 +433,30 @@ void SailingForm::on_startPushButton_clicked()
             currentOkta = firstOkta;
 
             double NError;
+            int navigationInterval;
             double sumNELengthX = 0, sumNELengthY = 0;
             for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
                 currentTime = startingTime;
+                navigationInterval = getGaussianRandomNumber((double) ui->hourIntervalSpinBox->value(), 1, "nav");
                 for(int j = 0; j < lengthOfDay; j++){
-                    if(j%ui->hourIntervalSpinBox->value() == 0)
-                        NError = getNorthError(currentTime, currentOkta, z);
+                    if(ui->noiseCheckBox->isChecked()){
+                        if(j%navigationInterval == 0){
+                            NError = getNorthError(currentTime, currentOkta, z);
+                            navigationInterval = getGaussianRandomNumber((double) ui->hourIntervalSpinBox->value(), 1, "nav");
+                        }
+                        qDebug("%d", navigationInterval);
+                    }
+                    if(!ui->noiseCheckBox->isChecked()){
+                        if(j%ui->hourIntervalSpinBox->value() == 0)
+                            NError = getNorthError(currentTime, currentOkta, z);
+                    }
                     if(NError != -999){
                         sumNELengthX += cos(NError*M_PI/180.0);
                         sumNELengthY += sin(NError*M_PI/180.0);
                         unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/voyageTime))); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
                     }
                     currentTime++;
-                    currentOkta += getGaussianRandomNumber(0,3);
+                    currentOkta += getGaussianRandomNumber(0,3.5, "cloud");
                     if(currentOkta <= 0)
                         currentOkta = 0;
                     if(currentOkta >= 8)
@@ -484,6 +498,9 @@ void SailingForm::on_startPushButton_clicked()
     ui->multipleRunGraphicsView->scene()->addPixmap(QPixmap::fromImage(endPointImage));
     ui->trajectoryGraphicsView->scene()->clear();
     ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
+
+    MessageDialog messDialog("Simulation ready");
+    messDialog.exec();
 
     trajectoryImage.save("trajectory.png");
     endPointImage.save("endpoint.png");

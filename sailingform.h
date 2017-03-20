@@ -32,7 +32,7 @@ private:
     QVector2D getUnitStepVector(double Nerror, double speed);
     double getNorthError(int time, int okta, int num);
     QMap<int, double> getTimeElevationMap(QString filename);
-    int getGaussianRandomNumber(double mu, double sigma);
+    int getGaussianRandomNumber(double mu, double sigma, QString mode);
     int getUniformRandomNumber(int low, int high);
     void drawUnitVectors(QImage &image, QColor &color, QList<QVector2D> &vectorList, QPointF shift); //shift x: horizontal, y: vertical
     void drawNavigationEndPoint(QImage &image, QColor &color, QList<QVector2D> &vectorList, QPointF shift);
