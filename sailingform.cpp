@@ -435,14 +435,17 @@ void SailingForm::on_startPushButton_clicked()
             double NError;
             int navigationInterval;
             double sumNELengthX = 0, sumNELengthY = 0;
+
             for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
+                int counter = 0;
                 currentTime = startingTime;
                 navigationInterval = getGaussianRandomNumber((double) ui->hourIntervalSpinBox->value(), 1, "nav");
                 for(int j = 0; j < lengthOfDay; j++){
                     if(ui->noiseCheckBox->isChecked()){
-                        if(j%navigationInterval == 0){
+                        if(counter%navigationInterval == 0){
                             NError = getNorthError(currentTime, currentOkta, z);
                             navigationInterval = getGaussianRandomNumber((double) ui->hourIntervalSpinBox->value(), 1, "nav");
+                            counter = 0;
                         }
                         qDebug("%d", navigationInterval);
                     }
@@ -461,6 +464,8 @@ void SailingForm::on_startPushButton_clicked()
                         currentOkta = 0;
                     if(currentOkta >= 8)
                         currentOkta = 8;
+
+                    counter++;
                 }
             }
 
@@ -487,7 +492,7 @@ void SailingForm::on_startPushButton_clicked()
             }
         }
 
-        if(resultedNError != -999 && z==3){
+        if(resultedNError != -999 && z==1){
             double success = 100*good/(good+wrong);
             ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 0, new QTableWidgetItem(QString::number(good)));
             ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 1, new QTableWidgetItem(QString::number(wrong)));
