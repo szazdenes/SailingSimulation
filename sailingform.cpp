@@ -216,7 +216,12 @@ int SailingForm::getGaussianRandomNumber(double mu, double sigma, QString mode) 
     if (call == 1)
     {
         call = !call;
-        return (mu + sigma * (double) X2);
+
+        double res = (mu + sigma * (double) X2);
+        if(mode == "nav" && res <= 1)
+            return 1;
+        else
+            return (mu + sigma * (double) X2);
     }
 
     do
