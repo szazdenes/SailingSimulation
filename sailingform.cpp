@@ -22,11 +22,11 @@ SailingForm::~SailingForm()
     delete ui;
 }
 
-QVector2D SailingForm::getUnitStepVector(double Nerror, double speed)
+QVector2D SailingForm::getUnitStepVector(double Nerror, double speed, double navIntervalMin)
 {
     QVector2D result;
-    result.setX(speed * qCos(Nerror * M_PI / 180.0));
-    result.setY(-1*speed * qSin(Nerror * M_PI / 180.0));
+    result.setX((speed/60.0)*navIntervalMin * qCos(Nerror * M_PI / 180.0));
+    result.setY(-1*(speed/60.0)*navIntervalMin * qSin(Nerror * M_PI / 180.0));
     return result;
 }
 
@@ -38,11 +38,11 @@ double SailingForm::getNorthError(int time, int okta, int num)
 
     if(ui->solRadioButton->isChecked()){
         if(ui->calciteCheckBox->isChecked() && num==1){
-            if(time < 12)
+            if((double)time/60.0 < 12)
                 file.setFileName("../cal_sol_am.csv");
-            if(time > 12)
+            if((double)time/60.0 > 12)
                 file.setFileName("../cal_sol_pm.csv");
-            if(time == 12){
+            if((double)time/60.0 == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
                     file.setFileName("../cal_sol_am.csv");
@@ -51,11 +51,11 @@ double SailingForm::getNorthError(int time, int okta, int num)
             }
         }
         else if(ui->cordieriteCheckBox->isChecked() && num==2){
-            if(time < 12)
+            if((double)time/60.0 < 12)
                 file.setFileName("../cord_sol_am.csv");
-            if(time > 12)
+            if((double)time/60.0 > 12)
                 file.setFileName("../cord_sol_pm.csv");
-            if(time == 12){
+            if((double)time/60.0 == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
                     file.setFileName("../cord_sol_am.csv");
@@ -64,11 +64,11 @@ double SailingForm::getNorthError(int time, int okta, int num)
             }
         }
         else if(ui->tourmalineCheckBox->isChecked() && num==3){
-            if(time < 12)
+            if((double)time/60.0 < 12)
                 file.setFileName("../tour_sol_am.csv");
-            if(time > 12)
+            if((double)time/60.0 > 12)
                 file.setFileName("../tour_sol_pm.csv");
-            if(time == 12){
+            if((double)time/60.0 == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
                     file.setFileName("../tour_sol_am.csv");
@@ -83,11 +83,11 @@ double SailingForm::getNorthError(int time, int okta, int num)
 
     if(ui->equRadioButton->isChecked()){
         if(ui->calciteCheckBox->isChecked() && num==1){
-            if(time < 12)
+            if((double)time/60.0 < 12)
                 file.setFileName("../cal_equ_am.csv");
-            if(time > 12)
+            if((double)time/60.0 > 12)
                 file.setFileName("../cal_equ_pm.csv");
-            if(time == 12){
+            if((double)time/60.0 == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
                     file.setFileName("../cal_equ_am.csv");
@@ -97,11 +97,11 @@ double SailingForm::getNorthError(int time, int okta, int num)
         }
 
         else if(ui->cordieriteCheckBox->isChecked() && num==2){
-            if(time < 12)
+            if((double)time/60.0 < 12)
                 file.setFileName("../cord_equ_am.csv");
-            if(time > 12)
+            if((double)time/60.0 > 12)
                 file.setFileName("../cord_equ_pm.csv");
-            if(time == 12){
+            if((double)time/60.0 == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
                     file.setFileName("../cord_equ_am.csv");
@@ -111,11 +111,11 @@ double SailingForm::getNorthError(int time, int okta, int num)
         }
 
         else if(ui->tourmalineCheckBox->isChecked() && num==3){
-            if(time < 12)
+            if((double)time/60.0 < 12)
                 file.setFileName("../tour_equ_am.csv");
-            if(time > 12)
+            if((double)time/60.0 > 12)
                 file.setFileName("../tour_equ_pm.csv");
-            if(time == 12){
+            if((double)time/60.0 == 12){
                 int randNum = getUniformRandomNumber(0,1);
                 if(randNum == 0)
                     file.setFileName("../tour_equ_am.csv");
@@ -157,25 +157,25 @@ double SailingForm::getNorthError(int time, int okta, int num)
     }
 
     int roundedElevation;
-    if(roundedElevationMap[time] > 0.0 && roundedElevationMap[time] <= 5.0)
+    if(roundedElevationMap[qRound((double)time/60.0)] > 0.0 && roundedElevationMap[qRound((double)time/60.0)] <= 5.0)
         roundedElevation = 5;
-    else if(roundedElevationMap[time] > 5 && roundedElevationMap[time] <= 10)
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 5 && roundedElevationMap[qRound((double)time/60.0)] <= 10)
         roundedElevation = 10;
-    else if(roundedElevationMap[time] > 10 && roundedElevationMap[time] <= 15)
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 10 && roundedElevationMap[qRound((double)time/60.0)] <= 15)
         roundedElevation = 15;
-    else if(roundedElevationMap[time] > 15 && roundedElevationMap[time] <= 20)
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 15 && roundedElevationMap[qRound((double)time/60.0)] <= 20)
         roundedElevation = 20;
-    else if(roundedElevationMap[time] > 20 && roundedElevationMap[time] <= 25)
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 20 && roundedElevationMap[qRound((double)time/60.0)] <= 25)
         roundedElevation = 25;
-    else if(roundedElevationMap[time] > 25 && roundedElevationMap[time] <= 30)
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 25 && roundedElevationMap[qRound((double)time/60.0)] <= 30)
         roundedElevation = 30;
-    else if(roundedElevationMap[time] > 30 && roundedElevationMap[time] <= 35)
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 30 && roundedElevationMap[qRound((double)time/60.0)] <= 35)
         roundedElevation = 35;
-    else if(roundedElevationMap[time] > 35 && roundedElevationMap[time] <= 40)
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 35 && roundedElevationMap[qRound((double)time/60.0)] <= 40)
         roundedElevation = 40;
-    else if(roundedElevationMap[time] > 40 && roundedElevationMap[time] <= 45)
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 40 && roundedElevationMap[qRound((double)time/60.0)] <= 45)
         roundedElevation = 45;
-    else if(roundedElevationMap[time] > 45 && roundedElevationMap[time] <= 50)
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 45 && roundedElevationMap[qRound((double)time/60.0)] <= 50)
         roundedElevation = 50;
     else return -999;
 
@@ -338,6 +338,14 @@ void SailingForm::fitImage(QImage &image, QGraphicsView *view)
     view->scale(zoom, zoom);
 }
 
+double SailingForm::getNavigationIntervalError(int interval)
+{
+    double result = (1.0/6.0)*(double)interval;
+    int rand = getUniformRandomNumber(0,1);
+    if(rand == 0) return -1*result;
+    if(rand == 1) return result;
+}
+
 void SailingForm::selectVikingRoute(QString inpath, QString outpath)
 {
     QFile file(inpath);
@@ -384,7 +392,7 @@ void SailingForm::on_startPushButton_clicked()
     QPainter p1(&endPointImage), p2(&trajectoryImage);
 
     double lengthOfVectorList = qAbs((trajectoryImage.width()/86.98)*(5.3 - (-67.989)) - (trajectoryImage.width()/86.98)*(-42.7 - (-67.989)));
-    double blowDist = contour.blowDistance(6372797, 1000, 1000, 16); //needs to be scaled
+    double blowDist = contour.blowDistance(6372797, 1000, 1000, 10); //needs to be scaled
     double blowDistPixel = blowDist*lengthOfVectorList/(distance*1000);
 
     QList<QPointF> contourPoints = contour.scaleContour("../contour.dat", background);
@@ -439,38 +447,45 @@ void SailingForm::on_startPushButton_clicked()
 
             double NError;
             int navigationInterval;
+            double navIntervalWithError;
+            int navIntervalWithErrorMin;
             double sumNELengthX = 0, sumNELengthY = 0;
 
             for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
                 int counter = 0;
                 currentTime = startingTime;
-                navigationInterval = getGaussianRandomNumber((double) ui->hourIntervalSpinBox->value(), 1, "nav");
-                for(int j = 0; j < lengthOfDay; j++){
+                navigationInterval = ui->hourIntervalSpinBox->value();
+                navIntervalWithError = navigationInterval;
+                navIntervalWithErrorMin = qRound(60*navIntervalWithError);
+                for(int j = 0; j < lengthOfDay*60; j+=navIntervalWithErrorMin){
                     if(ui->noiseCheckBox->isChecked()){
                         if(counter%navigationInterval == 0){
                             NError = getNorthError(currentTime, currentOkta, z);
-                            navigationInterval = getGaussianRandomNumber((double) ui->hourIntervalSpinBox->value(), 1, "nav");
+                            double navError = getNavigationIntervalError(navigationInterval);
+                            navIntervalWithError = (double)navigationInterval + navError;
+                            navIntervalWithErrorMin = qRound(60*navIntervalWithError);
                             counter = 0;
+                            qDebug("%f", navError);
                         }
-                        qDebug("%d", navigationInterval);
+
                     }
                     if(!ui->noiseCheckBox->isChecked()){
-                        if(j%ui->hourIntervalSpinBox->value() == 0)
+                        if(j%navIntervalWithErrorMin == 0)
                             NError = getNorthError(currentTime, currentOkta, z);
                     }
                     if(NError != -999){
                         sumNELengthX += cos(NError*M_PI/180.0);
                         sumNELengthY += sin(NError*M_PI/180.0);
-                        unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/voyageTime))); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
+                        unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/voyageTime), navIntervalWithErrorMin)); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
                     }
-                    currentTime++;
+                    currentTime += navIntervalWithErrorMin;
                     currentOkta += getGaussianRandomNumber(0,3.5, "cloud");
                     if(currentOkta <= 0)
                         currentOkta = 0;
                     if(currentOkta >= 8)
                         currentOkta = 8;
 
-                    counter++;
+                    counter += navIntervalWithErrorMin;
                 }
             }
 

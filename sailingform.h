@@ -29,7 +29,7 @@ private slots:
 
 private:
     Ui::SailingForm *ui;
-    QVector2D getUnitStepVector(double Nerror, double speed);
+    QVector2D getUnitStepVector(double Nerror, double speed, double navIntervalMin);
     double getNorthError(int time, int okta, int num);
     QMap<int, double> getTimeElevationMap(QString filename);
     int getGaussianRandomNumber(double mu, double sigma, QString mode);
@@ -37,6 +37,7 @@ private:
     void drawUnitVectors(QImage &image, QColor &color, QList<QVector2D> &vectorList, QPointF shift); //shift x: horizontal, y: vertical
     void drawNavigationEndPoint(QImage &image, QColor &color, QList<QVector2D> &vectorList, QPointF shift);
     void fitImage(QImage &image, QGraphicsView *view);
+    double getNavigationIntervalError(int interval);
 
     void selectVikingRoute(QString inpath, QString outpath);
 
