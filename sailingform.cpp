@@ -412,13 +412,6 @@ void SailingForm::on_startPushButton_clicked()
 
     for (int z = 1; z <= 3; z++){
 
-//        if(z==1)
-//            color = Qt::red;
-//        if(z==2)
-//            color = Qt::green;
-//        if(z==3)
-//            color = Qt::blue;
-
         QList<QVector2D> unitStepVectorList;
 
         double resultedNError = -999;
