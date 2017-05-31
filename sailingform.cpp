@@ -381,6 +381,20 @@ void SailingForm::addToList(QString string, bool clear)
     ui->listWidget->scrollToBottom();
 }
 
+double SailingForm::getMinDistance(QList<QPointF> &contourList, QPointF &currentPoint, QImage &image)
+{
+    QList<double> distList;
+    foreach(QPointF curr, contourList){
+        curr.setX(curr.x()*image.width());
+        curr.setY(curr.y()*image.height());
+        double dist = qSqrt((currentPoint.x()-curr.x())*(currentPoint.x()-curr.x()) + (currentPoint.y()-curr.y())*(currentPoint.y()-curr.y()));
+        distList.append(dist);
+    }
+    qSort(distList.begin(), distList.end());
+    double minDist = distList.first();
+    return minDist;
+}
+
 void SailingForm::on_startPushButton_clicked()
 {
     QImage background(QSize(800, 600), QImage::Format_ARGB32);
@@ -451,8 +465,13 @@ void SailingForm::on_startPushButton_clicked()
             double navIntervalWithError;
             int navIntervalWithErrorMin;
             double sumNELengthX = 0, sumNELengthY = 0;
+            QVector2D endpointVector;
+            QPointF shift = QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599));
+            bool success = false;
+            QList<double> minDistList;
+            QList<double> resNEList;
 
-            for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
+            for(int k = 0; k < ui->simLengthSpinBox->value(); k++){
                 int counter = 0;
                 currentTime = startingTime*60;
                 navigationInterval = ui->hourIntervalSpinBox->value();
@@ -472,7 +491,23 @@ void SailingForm::on_startPushButton_clicked()
                     if(NError != -999){
                         sumNELengthX += cos(NError*M_PI/180.0);
                         sumNELengthY += sin(NError*M_PI/180.0);
-                        unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/voyageTime), navIntervalWithErrorMin)); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
+                        QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime), navIntervalWithErrorMin);
+                        unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
+                        endpointVector += unitStepVector;
+                        QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
+                        double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
+
+                        if(sumNELengthY > 0)
+                            resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+                        else
+                            resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+
+                        resNEList.append(resultedNError);
+                        minDistList.append(minDist);
+
+//                        qDebug("%f", minDist);
+
+
                     }
                     currentTime += navIntervalWithErrorMin;
                     currentOkta += getGaussianRandomNumber(0,2, "cloud");
@@ -488,41 +523,48 @@ void SailingForm::on_startPushButton_clicked()
                 }
             }
 
+            if(!minDistList.isEmpty()){
+                QList<double> sortedMinDistList = minDistList;
+                qSort(sortedMinDistList.begin(), sortedMinDistList.end());
+                double minDistMin = sortedMinDistList.first();
+                double resNE = resNEList.at(minDistList.indexOf(minDistMin));
 
-            if(sumNELengthY > 0)
-                resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
-            else
-                resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+                if(minDistMin < 5 && resNE > -5 && success == false){
+                    success = true;
+                    qDebug("success: %f %f", minDistMin, resNE);
+                }
+                qDebug("%f %f", minDistMin, resNE);
+            }
 
-            if(resultedNError < -5 && resultedNError != -999){
+            if(!success){
                 color = Qt::red;
                 wrong++;
             }
-            if(resultedNError >= -5 && resultedNError != -999){
+            if(success){
                 color = Qt::green;
                 good++;
             }
 
             if(!unitStepVectorList.isEmpty()){
-                drawUnitVectors(trajectoryImage, color, unitStepVectorList, QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599)));
-
-                QApplication::processEvents();
+                drawUnitVectors(trajectoryImage, color, unitStepVectorList, shift);
             }
 //            if(resultedNError > -999) addToList("result: " + QString::number(resultedNError), false);
+            addToList("run: " + QString::number(i+1), true);
+            QApplication::processEvents();
         }
 
-        if(resultedNError != -999 && z==1){
-            double success = 100*good/(good+wrong);
+        if(z==1){
+            double successNum = 100*good/(good+wrong);
             ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 0, new QTableWidgetItem(QString::number(good)));
             ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 1, new QTableWidgetItem(QString::number(wrong)));
-            ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 2, new QTableWidgetItem(QString::number(success)));
+            ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 2, new QTableWidgetItem(QString::number(successNum)));
         }
     }
     ui->trajectoryGraphicsView->scene()->clear();
     ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
 
-    MessageDialog messDialog("Simulation ready");
-    messDialog.exec();
+//    MessageDialog messDialog("Simulation ready");
+//    messDialog.exec();
 
     trajectoryImage.save("trajectory.png");
 }

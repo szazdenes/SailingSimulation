@@ -40,6 +40,7 @@ private:
     double getNavigationIntervalError(int interval);
     void selectVikingRoute(QString inpath, QString outpath);
     void addToList(QString string, bool clear);
+    double getMinDistance(QList<QPointF> &contourList, QPointF &currentPoint, QImage &image);
 
     double distance;
     QGraphicsScene scene1, scene2;
