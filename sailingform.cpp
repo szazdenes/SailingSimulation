@@ -8,7 +8,6 @@ SailingForm::SailingForm(QWidget *parent) :
     ui->setupUi(this);
 
     ui->trajectoryGraphicsView->setScene(&scene1);
-    ui->multipleRunGraphicsView->setScene(&scene2);
 
     distance = 2720; //km
 
@@ -384,12 +383,10 @@ void SailingForm::on_startPushButton_clicked()
         background.setPixelColor(QPoint(qRound(backgroundPoints.at(i).x()), qRound(backgroundPoints.at(i).y())), Qt::black);
     }
 
-    QImage endPointImage(background.size(), QImage::Format_ARGB32);
-    endPointImage.fill(Qt::white);
     QImage trajectoryImage(background.size(), QImage::Format_ARGB32);
     trajectoryImage.fill(Qt::white);
     QColor color;
-    QPainter p1(&endPointImage), p2(&trajectoryImage);
+    QPainter p2(&trajectoryImage);
 
     double lengthOfVectorList = qAbs((trajectoryImage.width()/86.98)*(5.3 - (-67.989)) - (trajectoryImage.width()/86.98)*(-42.7 - (-67.989)));
     double blowDist = contour.blowDistance(6372797, 1000, 1000, 10); //needs to be scaled
@@ -405,13 +402,11 @@ void SailingForm::on_startPushButton_clicked()
     }
     painter.end();
 
-    p1.drawImage(0, 0, background);
     p2.drawImage(0, 0, background);
 
-    p1.end(); p2.end();
+    p2.end();
 
     fitImage(background, ui->trajectoryGraphicsView);
-    fitImage(background, ui->multipleRunGraphicsView);
 
     double voyageTime = distance/ui->speedDoubleSpinBox->value();
 
@@ -505,7 +500,6 @@ void SailingForm::on_startPushButton_clicked()
             }
 
             if(!unitStepVectorList.isEmpty()){
-                drawNavigationEndPoint(endPointImage, color, unitStepVectorList, QPointF((endPointImage.width()/86.98)*(5.3 - (-67.989)), -1*(endPointImage.height()/33.59)*(61 - 83.599)));
                 drawUnitVectors(trajectoryImage, color, unitStepVectorList, QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599)));
 
                 QApplication::processEvents();
@@ -519,8 +513,6 @@ void SailingForm::on_startPushButton_clicked()
             ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 2, new QTableWidgetItem(QString::number(success)));
         }
     }
-    ui->multipleRunGraphicsView->scene()->clear();
-    ui->multipleRunGraphicsView->scene()->addPixmap(QPixmap::fromImage(endPointImage));
     ui->trajectoryGraphicsView->scene()->clear();
     ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
 
@@ -528,5 +520,4 @@ void SailingForm::on_startPushButton_clicked()
     messDialog.exec();
 
     trajectoryImage.save("trajectory.png");
-    endPointImage.save("endpoint.png");
 }
