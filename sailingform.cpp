@@ -176,13 +176,15 @@ double SailingForm::getNorthError(int time, int okta, int num)
         roundedElevation = 45;
     else if(roundedElevationMap[qRound((double)time/60.0)] > 45 && roundedElevationMap[qRound((double)time/60.0)] <= 50)
         roundedElevation = 50;
-    else return -999;
+    else
+        return -999;
 
     QPair<int, int> keyPair(roundedElevation, okta);
 
     double NErrorNum = getUniformRandomNumber(0, NErrorMap[keyPair].size()-1);
     northError = NErrorMap[keyPair].at(NErrorNum);
 
+    elevation = roundedElevation;
     return northError;
 }
 
@@ -372,10 +374,15 @@ void SailingForm::selectVikingRoute(QString inpath, QString outpath)
     outfile.close();
 }
 
+void SailingForm::addToList(QString string, bool clear)
+{
+    if(clear == true) ui->listWidget->clear();
+    ui->listWidget->addItem(string);
+    ui->listWidget->scrollToBottom();
+}
+
 void SailingForm::on_startPushButton_clicked()
 {
-
-
     QImage background(QSize(800, 600), QImage::Format_ARGB32);
     background.fill(Qt::white);
     QList<QPointF> backgroundPoints = contour.scaleDataToImage("../terkep.dat", background);
@@ -441,40 +448,37 @@ void SailingForm::on_startPushButton_clicked()
 
             for(int i = 0; i < ui->simLengthSpinBox->value(); i++){
                 int counter = 0;
-                currentTime = startingTime;
+                currentTime = startingTime*60;
                 navigationInterval = ui->hourIntervalSpinBox->value();
                 navIntervalWithError = navigationInterval;
                 navIntervalWithErrorMin = qRound(60*navIntervalWithError);
                 for(int j = 0; j < lengthOfDay*60; j+=navIntervalWithErrorMin){
                     if(ui->noiseCheckBox->isChecked()){
-                        if(counter%navigationInterval == 0){
-                            NError = getNorthError(currentTime, currentOkta, z);
-                            double navError = getNavigationIntervalError(navigationInterval);
-                            navIntervalWithError = (double)navigationInterval + navError;
-                            navIntervalWithErrorMin = qRound(60*navIntervalWithError);
-                            counter = 0;
-                            qDebug("%f", navError);
-                        }
-
+                        NError = getNorthError(currentTime, currentOkta, z);
+                        double navError = getNavigationIntervalError(navigationInterval);
+                        navIntervalWithError = (double)navigationInterval + navError;
+                        navIntervalWithErrorMin = qRound(60*navIntervalWithError);
+                        counter = 0;
                     }
                     if(!ui->noiseCheckBox->isChecked()){
-                        if(j%navIntervalWithErrorMin == 0)
-                            NError = getNorthError(currentTime, currentOkta, z);
+                        NError = getNorthError(currentTime, currentOkta, z);
                     }
-                    qDebug("%f", NError);
                     if(NError != -999){
                         sumNELengthX += cos(NError*M_PI/180.0);
                         sumNELengthY += sin(NError*M_PI/180.0);
                         unitStepVectorList.append(getUnitStepVector(NError, (lengthOfVectorList/voyageTime), navIntervalWithErrorMin)); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
                     }
                     currentTime += navIntervalWithErrorMin;
-                    currentOkta += getGaussianRandomNumber(0,3.5, "cloud");
+                    currentOkta += getGaussianRandomNumber(0,2, "cloud");
                     if(currentOkta <= 0)
                         currentOkta = 0;
                     if(currentOkta >= 8)
                         currentOkta = 8;
 
                     counter += navIntervalWithErrorMin;
+
+                    if(i == 0 && j==0 && NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), true);
+                    else if(NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
                 }
             }
 
@@ -498,6 +502,7 @@ void SailingForm::on_startPushButton_clicked()
 
                 QApplication::processEvents();
             }
+            if(resultedNError > -999) addToList("result: " + QString::number(resultedNError), false);
         }
 
         if(resultedNError != -999 && z==1){

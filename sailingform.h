@@ -38,13 +38,14 @@ private:
     void drawNavigationEndPoint(QImage &image, QColor &color, QList<QVector2D> &vectorList, QPointF shift);
     void fitImage(QImage &image, QGraphicsView *view);
     double getNavigationIntervalError(int interval);
-
     void selectVikingRoute(QString inpath, QString outpath);
+    void addToList(QString string, bool clear);
 
     double distance;
     QGraphicsScene scene1, scene2;
     double sumLength;
     ContourRecognition contour;
+    int elevation;
 };
 
 #endif // SAILINGFORM_H
