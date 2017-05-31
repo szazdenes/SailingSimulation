@@ -156,7 +156,7 @@ double SailingForm::getNorthError(int time, int okta, int num)
     }
 
     int roundedElevation;
-    if(roundedElevationMap[qRound((double)time/60.0)] > 0.0 && roundedElevationMap[qRound((double)time/60.0)] <= 5.0)
+    if(roundedElevationMap[qRound((double)time/60.0)] >= 0.0 && roundedElevationMap[qRound((double)time/60.0)] <= 5.0)
         roundedElevation = 5;
     else if(roundedElevationMap[qRound((double)time/60.0)] > 5 && roundedElevationMap[qRound((double)time/60.0)] <= 10)
         roundedElevation = 10;
@@ -461,6 +461,7 @@ void SailingForm::on_startPushButton_clicked()
                         if(j%navIntervalWithErrorMin == 0)
                             NError = getNorthError(currentTime, currentOkta, z);
                     }
+                    qDebug("%f", NError);
                     if(NError != -999){
                         sumNELengthX += cos(NError*M_PI/180.0);
                         sumNELengthY += sin(NError*M_PI/180.0);
