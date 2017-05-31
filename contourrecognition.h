@@ -23,6 +23,7 @@ public:
     QList<QPointF> scaleDataToImage(QString dataPath, QImage &image);
     QList<QPointF> scaleContour(QString dataPath, QImage &image);
     double blowDistance(double R, double s, double H, double h);
+    QList<QPointF>getRelativeContourPositions(QImage &image);
 
 signals:
 

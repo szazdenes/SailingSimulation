@@ -173,3 +173,15 @@ double ContourRecognition::blowDistance(double R, double s, double H, double h)
     return distance;
 }
 
+QList<QPointF> ContourRecognition::getRelativeContourPositions(QImage &image)
+{
+    QList<QPointF> relContPos;
+    for(int i = 0; i < image.width(); i++){
+        for(int j = 0; j < image.height(); j++){
+            if(image.pixelColor(i,j) == Qt::blue)
+                relContPos.append(QPointF((double)i/(double)image.width(), (double)j/(double)image.height()));
+        }
+    }
+    return relContPos;
+}
+

@@ -391,6 +391,7 @@ void SailingForm::on_startPushButton_clicked()
     }
 
     QImage trajectoryImage(background.size(), QImage::Format_ARGB32);
+    QImage contourImage("../cont_calib.png");
     trajectoryImage.fill(Qt::white);
     QColor color;
     QPainter p2(&trajectoryImage);
@@ -401,11 +402,16 @@ void SailingForm::on_startPushButton_clicked()
 
     QList<QPointF> contourPoints = contour.scaleContour("../contour.dat", background);
     QList<QPointF> blownContour = contour.blowUpContour(contourPoints, blowDistPixel, background);
+    QList<QPointF> relativeContourPoints = contour.getRelativeContourPositions(contourImage);
+
     QPainter painter(&background);
     painter.setPen(Qt::magenta);
-    for(int i = 0; i < blownContour.size()-1; i++){
-        background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
-        painter.drawLine(contourPoints.at(i), contourPoints.at(i+1));
+    for(int i = 0; i < relativeContourPoints.size(); i++){
+        background.setPixelColor(QPoint(qRound(relativeContourPoints.at(i).x()*background.width()), qRound(relativeContourPoints.at(i).y()*background.height())), Qt::blue);
+        if(i < contourPoints.size()-1){
+//            background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
+            painter.drawLine(contourPoints.at(i), contourPoints.at(i+1));
+        }
     }
     painter.end();
 
@@ -477,8 +483,8 @@ void SailingForm::on_startPushButton_clicked()
 
                     counter += navIntervalWithErrorMin;
 
-                    if(i == 0 && j==0 && NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), true);
-                    else if(NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
+//                    if(i == 0 && j==0 && NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), true);
+//                    else if(NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
                 }
             }
 
@@ -502,7 +508,7 @@ void SailingForm::on_startPushButton_clicked()
 
                 QApplication::processEvents();
             }
-            if(resultedNError > -999) addToList("result: " + QString::number(resultedNError), false);
+//            if(resultedNError > -999) addToList("result: " + QString::number(resultedNError), false);
         }
 
         if(resultedNError != -999 && z==1){
