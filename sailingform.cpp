@@ -406,6 +406,7 @@ void SailingForm::on_startPushButton_clicked()
 
     QImage trajectoryImage(background.size(), QImage::Format_ARGB32);
     QImage contourImage("../cont_calib.png");
+    QImage contAreaImage("../cont_calib_filled.png");
     trajectoryImage.fill(Qt::white);
     QColor color;
     QPainter p2(&trajectoryImage);
@@ -415,8 +416,9 @@ void SailingForm::on_startPushButton_clicked()
     double blowDistPixel = blowDist*lengthOfVectorList/(distance*1000);
 
     QList<QPointF> contourPoints = contour.scaleContour("../contour.dat", background);
-    QList<QPointF> blownContour = contour.blowUpContour(contourPoints, blowDistPixel, background);
+//    QList<QPointF> blownContour = contour.blowUpContour(contourPoints, blowDistPixel, background);
     QList<QPointF> relativeContourPoints = contour.getRelativeContourPositions(contourImage);
+    QList<QPointF> relativeContAreaPoints = contour.getRelativeContourPositions(contAreaImage);
 
     QPainter painter(&background);
     painter.setPen(Qt::magenta);
@@ -441,7 +443,7 @@ void SailingForm::on_startPushButton_clicked()
 
         QList<QVector2D> unitStepVectorList;
 
-        double resultedNError = -999;
+//        double resultedNError = -999;
         double good = 0, wrong = 0;
         for(int i = 0; i < ui->numOfRunsSpinBox->value(); i++){
             unitStepVectorList.clear();
@@ -464,12 +466,12 @@ void SailingForm::on_startPushButton_clicked()
             int navigationInterval;
             double navIntervalWithError;
             int navIntervalWithErrorMin;
-            double sumNELengthX = 0, sumNELengthY = 0;
+//            double sumNELengthX = 0, sumNELengthY = 0;
             QVector2D endpointVector;
             QPointF shift = QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599));
             bool success = false;
-            QList<double> minDistList;
-            QList<double> resNEList;
+//            QList<double> minDistList;
+//            QList<double> resNEList;
 
             for(int k = 0; k < ui->simLengthSpinBox->value(); k++){
                 int counter = 0;
@@ -489,21 +491,30 @@ void SailingForm::on_startPushButton_clicked()
                         NError = getNorthError(currentTime, currentOkta, z);
                     }
                     if(NError != -999){
-                        sumNELengthX += cos(NError*M_PI/180.0);
-                        sumNELengthY += sin(NError*M_PI/180.0);
+//                        sumNELengthX += cos(NError*M_PI/180.0);
+//                        sumNELengthY += sin(NError*M_PI/180.0);
                         QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime), navIntervalWithErrorMin);
                         unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
                         endpointVector += unitStepVector;
                         QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
-                        double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
+//                        double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
 
-                        if(sumNELengthY > 0)
-                            resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
-                        else
-                            resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+//                        if(sumNELengthY > 0)
+//                            resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+//                        else
+//                            resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
 
-                        resNEList.append(resultedNError);
-                        minDistList.append(minDist);
+//                        resNEList.append(resultedNError);
+//                        minDistList.append(minDist);
+
+                        if(!relativeContAreaPoints.isEmpty()){
+                            foreach(QPointF currentPixel, relativeContAreaPoints){
+                                if(qRound(currentPixel.x()*background.width()) == qRound(unitStepPoint.x()) && qRound(currentPixel.y()*background.height()) == qRound(unitStepPoint.y())){
+                                    success = true;
+                                    break;
+                                }
+                            }
+                        }
 
 //                        qDebug("%f", minDist);
 
@@ -523,18 +534,18 @@ void SailingForm::on_startPushButton_clicked()
                 }
             }
 
-            if(!minDistList.isEmpty()){
-                QList<double> sortedMinDistList = minDistList;
-                qSort(sortedMinDistList.begin(), sortedMinDistList.end());
-                double minDistMin = sortedMinDistList.first();
-                double resNE = resNEList.at(minDistList.indexOf(minDistMin));
+//            if(!minDistList.isEmpty()){
+//                QList<double> sortedMinDistList = minDistList;
+//                qSort(sortedMinDistList.begin(), sortedMinDistList.end());
+//                double minDistMin = sortedMinDistList.first();
+//                double resNE = resNEList.at(minDistList.indexOf(minDistMin));
 
-                if(minDistMin < 5 && resNE > -5 && success == false){
-                    success = true;
-                    qDebug("success: %f %f", minDistMin, resNE);
-                }
-                qDebug("%f %f", minDistMin, resNE);
-            }
+//                if(minDistMin < 5 && resNE > -5 && success == false){
+//                    success = true;
+//                    qDebug("success: %f %f", minDistMin, resNE);
+//                }
+//                qDebug("%f %f", minDistMin, resNE);
+//            }
 
             if(!success){
                 color = Qt::red;
