@@ -36,7 +36,7 @@ double SailingForm::getNorthError(int time, int okta, int num)
     QFile file;
 
     if(ui->solRadioButton->isChecked()){
-        if(ui->calciteCheckBox->isChecked() && num==1){
+        if(ui->calciteRadioButton->isChecked() && num==1){
             if((double)time/60.0 < 12)
                 file.setFileName("../cal_sol_am.csv");
             if((double)time/60.0 > 12)
@@ -49,7 +49,7 @@ double SailingForm::getNorthError(int time, int okta, int num)
                     file.setFileName("../cal_sol_pm.csv");
             }
         }
-        else if(ui->cordieriteCheckBox->isChecked() && num==2){
+        else if(ui->cordieriteRadioButton->isChecked() && num==2){
             if((double)time/60.0 < 12)
                 file.setFileName("../cord_sol_am.csv");
             if((double)time/60.0 > 12)
@@ -62,7 +62,7 @@ double SailingForm::getNorthError(int time, int okta, int num)
                     file.setFileName("../cord_sol_pm.csv");
             }
         }
-        else if(ui->tourmalineCheckBox->isChecked() && num==3){
+        else if(ui->tourmalineRadioButton->isChecked() && num==3){
             if((double)time/60.0 < 12)
                 file.setFileName("../tour_sol_am.csv");
             if((double)time/60.0 > 12)
@@ -81,7 +81,7 @@ double SailingForm::getNorthError(int time, int okta, int num)
     }
 
     if(ui->equRadioButton->isChecked()){
-        if(ui->calciteCheckBox->isChecked() && num==1){
+        if(ui->calciteRadioButton->isChecked() && num==1){
             if((double)time/60.0 < 12)
                 file.setFileName("../cal_equ_am.csv");
             if((double)time/60.0 > 12)
@@ -95,7 +95,7 @@ double SailingForm::getNorthError(int time, int okta, int num)
             }
         }
 
-        else if(ui->cordieriteCheckBox->isChecked() && num==2){
+        else if(ui->cordieriteRadioButton->isChecked() && num==2){
             if((double)time/60.0 < 12)
                 file.setFileName("../cord_equ_am.csv");
             if((double)time/60.0 > 12)
@@ -109,7 +109,7 @@ double SailingForm::getNorthError(int time, int okta, int num)
             }
         }
 
-        else if(ui->tourmalineCheckBox->isChecked() && num==3){
+        else if(ui->tourmalineRadioButton->isChecked() && num==3){
             if((double)time/60.0 < 12)
                 file.setFileName("../tour_equ_am.csv");
             if((double)time/60.0 > 12)
@@ -407,7 +407,9 @@ void SailingForm::on_startPushButton_clicked()
     QImage trajectoryImage(background.size(), QImage::Format_ARGB32);
     QImage contourImage("../cont_calib.png");
     QImage contAreaImage("../cont_calib_filled.png");
+    QImage contImage(background.size(), QImage::Format_ARGB32);
     trajectoryImage.fill(Qt::white);
+    contImage.fill(Qt::transparent);
     QColor color;
     QPainter p2(&trajectoryImage);
 
@@ -416,23 +418,11 @@ void SailingForm::on_startPushButton_clicked()
     double blowDistPixel = blowDist*lengthOfVectorList/(distance*1000);
 
     QList<QPointF> contourPoints = contour.scaleContour("../contour.dat", background);
-//    QList<QPointF> blownContour = contour.blowUpContour(contourPoints, blowDistPixel, background);
+    //    QList<QPointF> blownContour = contour.blowUpContour(contourPoints, blowDistPixel, background);
     QList<QPointF> relativeContourPoints = contour.getRelativeContourPositions(contourImage);
     QList<QPointF> relativeContAreaPoints = contour.getRelativeContourPositions(contAreaImage);
 
-    QPainter painter(&background);
-    painter.setPen(Qt::magenta);
-    for(int i = 0; i < relativeContourPoints.size(); i++){
-        background.setPixelColor(QPoint(qRound(relativeContourPoints.at(i).x()*background.width()), qRound(relativeContourPoints.at(i).y()*background.height())), Qt::blue);
-        if(i < contourPoints.size()-1){
-//            background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
-            painter.drawLine(contourPoints.at(i), contourPoints.at(i+1));
-        }
-    }
-    painter.end();
-
     p2.drawImage(0, 0, background);
-
     p2.end();
 
     fitImage(background, ui->trajectoryGraphicsView);
@@ -443,139 +433,160 @@ void SailingForm::on_startPushButton_clicked()
 
         QList<QVector2D> unitStepVectorList;
 
-//        double resultedNError = -999;
-        double good = 0, wrong = 0;
-        for(int i = 0; i < ui->numOfRunsSpinBox->value(); i++){
-            unitStepVectorList.clear();
-            int firstOkta = getUniformRandomNumber(0,8);
-            int currentOkta;
-            int currentTime, startingTime, lengthOfDay;
+        int currentStone;
+        if(ui->calciteRadioButton->isChecked()) currentStone = 1;
+        if(ui->cordieriteRadioButton->isChecked()) currentStone = 2;
+        if(ui->tourmalineRadioButton->isChecked()) currentStone = 3;
 
-            if(ui->solRadioButton->isChecked()){
-                startingTime = 3;
-                lengthOfDay = 17;
-            }
-            if(ui->equRadioButton->isChecked()){
-                startingTime = 6;
-                lengthOfDay = 11;
-            }
+        if(z==currentStone){
 
-            currentOkta = firstOkta;
+            //        double resultedNError = -999;
+            double good = 0, wrong = 0;
+            for(int i = 0; i < ui->numOfRunsSpinBox->value(); i++){
+                unitStepVectorList.clear();
+                int firstOkta = getUniformRandomNumber(0,8);
+                int currentOkta;
+                int currentTime, startingTime, lengthOfDay;
 
-            double NError;
-            int navigationInterval;
-            double navIntervalWithError;
-            int navIntervalWithErrorMin;
-//            double sumNELengthX = 0, sumNELengthY = 0;
-            QVector2D endpointVector;
-            QPointF shift = QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599));
-            bool success = false;
-//            QList<double> minDistList;
-//            QList<double> resNEList;
+                if(ui->solRadioButton->isChecked()){
+                    startingTime = 3;
+                    lengthOfDay = 17;
+                }
+                if(ui->equRadioButton->isChecked()){
+                    startingTime = 6;
+                    lengthOfDay = 11;
+                }
 
-            for(int k = 0; k < ui->simLengthSpinBox->value(); k++){
-                int counter = 0;
-                currentTime = startingTime*60;
-                navigationInterval = ui->hourIntervalSpinBox->value();
-                navIntervalWithError = navigationInterval;
-                navIntervalWithErrorMin = qRound(60*navIntervalWithError);
-                for(int j = 0; j < lengthOfDay*60; j+=navIntervalWithErrorMin){
-                    if(ui->noiseCheckBox->isChecked()){
-                        NError = getNorthError(currentTime, currentOkta, z);
-                        double navError = getNavigationIntervalError(navigationInterval);
-                        navIntervalWithError = (double)navigationInterval + navError;
-                        navIntervalWithErrorMin = qRound(60*navIntervalWithError);
-                        counter = 0;
-                    }
-                    if(!ui->noiseCheckBox->isChecked()){
-                        NError = getNorthError(currentTime, currentOkta, z);
-                    }
-                    if(NError != -999){
-//                        sumNELengthX += cos(NError*M_PI/180.0);
-//                        sumNELengthY += sin(NError*M_PI/180.0);
-                        QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime), navIntervalWithErrorMin);
-                        unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
-                        endpointVector += unitStepVector;
-                        QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
-//                        double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
+                currentOkta = firstOkta;
 
-//                        if(sumNELengthY > 0)
-//                            resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
-//                        else
-//                            resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+                double NError;
+                int navigationInterval;
+                double navIntervalWithError;
+                int navIntervalWithErrorMin;
+                //            double sumNELengthX = 0, sumNELengthY = 0;
+                QVector2D endpointVector;
+                QPointF shift = QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599));
+                bool success = false;
+                //            QList<double> minDistList;
+                //            QList<double> resNEList;
 
-//                        resNEList.append(resultedNError);
-//                        minDistList.append(minDist);
+                for(int k = 0; k < ui->simLengthSpinBox->value(); k++){
+                    int counter = 0;
+                    currentTime = startingTime*60;
+                    navigationInterval = ui->hourIntervalSpinBox->value();
+                    navIntervalWithError = navigationInterval;
+                    navIntervalWithErrorMin = qRound(60*navIntervalWithError);
+                    for(int j = 0; j < lengthOfDay*60; j+=navIntervalWithErrorMin){
+                        if(ui->noiseCheckBox->isChecked()){
+                            NError = getNorthError(currentTime, currentOkta, z);
+                            double navError = getNavigationIntervalError(navigationInterval);
+                            navIntervalWithError = (double)navigationInterval + navError;
+                            navIntervalWithErrorMin = qRound(60*navIntervalWithError);
+                            counter = 0;
+                        }
+                        if(!ui->noiseCheckBox->isChecked()){
+                            NError = getNorthError(currentTime, currentOkta, z);
+                        }
+                        if(NError != -999){
+                            //                        sumNELengthX += cos(NError*M_PI/180.0);
+                            //                        sumNELengthY += sin(NError*M_PI/180.0);
+                            QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime), navIntervalWithErrorMin);
+                            unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
+                            endpointVector += unitStepVector;
+                            QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
+                            double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
 
-                        if(!relativeContAreaPoints.isEmpty()){
-                            foreach(QPointF currentPixel, relativeContAreaPoints){
-                                if(qRound(currentPixel.x()*background.width()) == qRound(unitStepPoint.x()) && qRound(currentPixel.y()*background.height()) == qRound(unitStepPoint.y())){
-                                    success = true;
-                                    break;
+                            //                        if(sumNELengthY > 0)
+                            //                            resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+                            //                        else
+                            //                            resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+
+                            //                        resNEList.append(resultedNError);
+                            //                        minDistList.append(minDist);
+
+                            if(!relativeContAreaPoints.isEmpty() && minDist < 30 && success == false){
+                                foreach(QPointF currentPixel, relativeContAreaPoints){
+                                    if(qRound(currentPixel.x()*background.width()) == qRound(unitStepPoint.x()) && qRound(currentPixel.y()*background.height()) == qRound(unitStepPoint.y())){
+                                        success = true;
+                                        break;
+                                    }
                                 }
                             }
+
+                            //                        qDebug("%f", minDist);
+
+
                         }
+                        currentTime += navIntervalWithErrorMin;
+                        currentOkta += getGaussianRandomNumber(0,2, "cloud");
+                        if(currentOkta <= 0)
+                            currentOkta = 0;
+                        if(currentOkta >= 8)
+                            currentOkta = 8;
 
-//                        qDebug("%f", minDist);
+                        counter += navIntervalWithErrorMin;
 
-
+                        //                    if(i == 0 && j==0 && NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), true);
+                        //                    else if(NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
                     }
-                    currentTime += navIntervalWithErrorMin;
-                    currentOkta += getGaussianRandomNumber(0,2, "cloud");
-                    if(currentOkta <= 0)
-                        currentOkta = 0;
-                    if(currentOkta >= 8)
-                        currentOkta = 8;
-
-                    counter += navIntervalWithErrorMin;
-
-//                    if(i == 0 && j==0 && NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), true);
-//                    else if(NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
                 }
+
+                //            if(!minDistList.isEmpty()){
+                //                QList<double> sortedMinDistList = minDistList;
+                //                qSort(sortedMinDistList.begin(), sortedMinDistList.end());
+                //                double minDistMin = sortedMinDistList.first();
+                //                double resNE = resNEList.at(minDistList.indexOf(minDistMin));
+
+                //                if(minDistMin < 5 && resNE > -5 && success == false){
+                //                    success = true;
+                //                    qDebug("success: %f %f", minDistMin, resNE);
+                //                }
+                //                qDebug("%f %f", minDistMin, resNE);
+                //            }
+
+                if(!success){
+                    color = Qt::red;
+                    wrong++;
+                }
+                if(success){
+                    color = Qt::green;
+                    good++;
+                }
+
+                if(!unitStepVectorList.isEmpty()){
+                    drawUnitVectors(trajectoryImage, color, unitStepVectorList, shift);
+                }
+                //            if(resultedNError > -999) addToList("result: " + QString::number(resultedNError), false);
+                addToList("run: " + QString::number(i+1), true);
+                QApplication::processEvents();
             }
 
-//            if(!minDistList.isEmpty()){
-//                QList<double> sortedMinDistList = minDistList;
-//                qSort(sortedMinDistList.begin(), sortedMinDistList.end());
-//                double minDistMin = sortedMinDistList.first();
-//                double resNE = resNEList.at(minDistList.indexOf(minDistMin));
 
-//                if(minDistMin < 5 && resNE > -5 && success == false){
-//                    success = true;
-//                    qDebug("success: %f %f", minDistMin, resNE);
-//                }
-//                qDebug("%f %f", minDistMin, resNE);
-//            }
-
-            if(!success){
-                color = Qt::red;
-                wrong++;
-            }
-            if(success){
-                color = Qt::green;
-                good++;
-            }
-
-            if(!unitStepVectorList.isEmpty()){
-                drawUnitVectors(trajectoryImage, color, unitStepVectorList, shift);
-            }
-//            if(resultedNError > -999) addToList("result: " + QString::number(resultedNError), false);
-            addToList("run: " + QString::number(i+1), true);
-            QApplication::processEvents();
-        }
-
-        if(z==1){
             double successNum = 100*good/(good+wrong);
             ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 0, new QTableWidgetItem(QString::number(good)));
             ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 1, new QTableWidgetItem(QString::number(wrong)));
             ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 2, new QTableWidgetItem(QString::number(successNum)));
+
+            QPainter painter(&trajectoryImage);
+            painter.setPen(Qt::magenta);
+            for(int i = 0; i < relativeContourPoints.size(); i++){
+                contImage.setPixelColor(QPoint(qRound(relativeContourPoints.at(i).x()*background.width()), qRound(relativeContourPoints.at(i).y()*background.height())), Qt::blue);
+                if(i < contourPoints.size()-1){
+                    //            background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
+                    painter.drawLine(contourPoints.at(i), contourPoints.at(i+1));
+                }
+            }
+            painter.drawImage(0, 0, contImage);
+            painter.end();
+
         }
     }
+
     ui->trajectoryGraphicsView->scene()->clear();
     ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
 
-//    MessageDialog messDialog("Simulation ready");
-//    messDialog.exec();
+    //    MessageDialog messDialog("Simulation ready");
+    //    messDialog.exec();
 
     trajectoryImage.save("trajectory.png");
 }

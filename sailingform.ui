@@ -98,7 +98,7 @@
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>20</number>
+         <number>6</number>
         </property>
        </widget>
       </item>
@@ -172,21 +172,21 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
       <item row="0" column="1">
-       <widget class="QCheckBox" name="cordieriteCheckBox">
+       <widget class="QRadioButton" name="cordieriteRadioButton">
         <property name="text">
          <string>Cordierite</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QCheckBox" name="calciteCheckBox">
+       <widget class="QRadioButton" name="calciteRadioButton">
         <property name="text">
          <string>Calcite</string>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QCheckBox" name="tourmalineCheckBox">
+       <widget class="QRadioButton" name="tourmalineRadioButton">
         <property name="text">
          <string>Tourmaline</string>
         </property>
