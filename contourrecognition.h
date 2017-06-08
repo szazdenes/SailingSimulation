@@ -24,6 +24,10 @@ public:
     QList<QPointF> scaleContour(QString dataPath, QImage &image);
     double blowDistance(double R, double s, double H, double h);
     QList<QPointF>getRelativeContourPositions(QImage &image);
+    QPointF rescaleDataToMapPoints(QPointF data);
+
+private:
+    double xmin = 0, xmax = 0, ymin = 0, ymax = 0, height = 0, width = 0;
 };
 
 #endif // CONTOURRECOGNITION_H

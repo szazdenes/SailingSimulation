@@ -436,6 +436,8 @@ void SailingForm::on_startPushButton_clicked()
 
     double voyageTime = distance/ui->speedDoubleSpinBox->value();
 
+    int startingTime, lengthOfDay;
+
     for (int z = 1; z <= 3; z++){
 
         QList<QVector2D> unitStepVectorList;
@@ -454,26 +456,39 @@ void SailingForm::on_startPushButton_clicked()
             currentStone = 3;
         }
 
+
         if(z==currentStone){
+
+            if(ui->solRadioButton->isChecked()){
+                equsol = "sol";
+                startingTime = 3;
+                lengthOfDay = 17;
+            }
+            if(ui->equRadioButton->isChecked()){
+                equsol = "equ";
+                startingTime = 6;
+                lengthOfDay = 11;
+            }
+
+            QString filename = "trajectory_" + stone + "_" + equsol + "_" + "speed" + QString::number(ui->speedDoubleSpinBox->value()) + "_"
+                    + "days" + QString::number(ui->simLengthSpinBox->value()) + "_" + "navperiodicity"
+                    + QString::number(ui->hourIntervalSpinBox->value())
+                    + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + ".csv";
+            QFile outFile(filename);
+
+            if(!outFile.open(QIODevice::WriteOnly | QIODevice::Text))
+                qDebug("baj");
+            QTextStream outStream(&outFile);
 
             //        double resultedNError = -999;
             double good = 0, wrong = 0;
             for(int i = 0; i < ui->numOfRunsSpinBox->value(); i++){
                 unitStepVectorList.clear();
+                outStream << "----------------------------\n";
+
                 int firstOkta = getUniformRandomNumber(0,8);
                 int currentOkta;
-                int currentTime, startingTime, lengthOfDay;
-
-                if(ui->solRadioButton->isChecked()){
-                    equsol = "sol";
-                    startingTime = 3;
-                    lengthOfDay = 17;
-                }
-                if(ui->equRadioButton->isChecked()){
-                    equsol = "equ";
-                    startingTime = 6;
-                    lengthOfDay = 11;
-                }
+                int currentTime;
 
                 currentOkta = firstOkta;
 
@@ -516,6 +531,8 @@ void SailingForm::on_startPushButton_clicked()
                                 unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
                                 endpointVector += unitStepVector;
                                 QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
+                                QPointF rescaledPoint = contour.rescaleDataToMapPoints(unitStepPoint);
+                                outStream << QString::number(rescaledPoint.x()) << "\t" << QString::number(rescaledPoint.y()) << "\n";
                                 double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
 
                                 //                        if(sumNELengthY > 0)
@@ -617,8 +634,10 @@ void SailingForm::on_startPushButton_clicked()
                     + QString::number(ui->hourIntervalSpinBox->value())
                     + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + ".png";
 
+            outFile.close();
         }
     }
+
     trajectoryImage.save(outName);
 
 }

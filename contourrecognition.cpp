@@ -100,13 +100,16 @@ void ContourRecognition::skeletonize(int posX, int posY, QImage &image)
 
 QList<QPointF> ContourRecognition::scaleDataToImage(QString dataPath, QImage &image)
 {
+    height = image.height();
+    width = image.width();
+
     QList<QPointF> dataList;
     QList<double> xList, yList;
     QFile file(dataPath);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
         qDebug("Opening error.");
     }
-    double x, y, xmin, xmax, ymin, ymax;
+    double x, y;
     QTextStream stream(&file);
     while(!stream.atEnd()){
         QString line = stream.readLine();
@@ -130,8 +133,8 @@ QList<QPointF> ContourRecognition::scaleDataToImage(QString dataPath, QImage &im
 
     foreach(QPointF current, dataList){
         QPointF scaled;
-        scaled.setX((image.width()/qAbs(xmax-xmin))*(current.x() - xmin));
-        scaled.setY(-1*(image.height()/qAbs(ymax-ymin))*(current.y() - ymax));
+        scaled.setX((width/qAbs(xmax-xmin))*(current.x() - xmin));
+        scaled.setY(-1*(height/qAbs(ymax-ymin))*(current.y() - ymax));
         scaledList.append(scaled);
     }
 
@@ -183,5 +186,12 @@ QList<QPointF> ContourRecognition::getRelativeContourPositions(QImage &image)
         }
     }
     return relContPos;
+}
+
+QPointF ContourRecognition::rescaleDataToMapPoints(QPointF data)
+{
+    double x = (data.x()*(xmax-xmin))/width + xmin;
+    double y = (-1*data.y()*(ymax-ymin))/height + ymax;
+    return QPointF(x,y);
 }
 
