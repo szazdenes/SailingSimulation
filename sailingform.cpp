@@ -342,10 +342,12 @@ void SailingForm::fitImage(QImage &image, QGraphicsView *view)
 
 double SailingForm::getNavigationIntervalError(int interval)
 {
-    double result = (1.0/6.0)*(double)interval;
+    double error = (1.0/6.0)*(double)interval;
+//    double result = (double)getUniformRandomNumber(0, qRound(error*60))/60.0;
+    double result = error;
     int rand = getUniformRandomNumber(0,1);
-    if(rand == 0) return -1*result;
-    if(rand == 1) return result;
+    if(rand == 0) return result;
+    if(rand == 1) return -1*result;
 }
 
 void SailingForm::selectVikingRoute(QString inpath, QString outpath)
@@ -493,60 +495,65 @@ void SailingForm::on_startPushButton_clicked()
                     navigationInterval = ui->hourIntervalSpinBox->value();
                     navIntervalWithError = navigationInterval;
                     navIntervalWithErrorMin = qRound(60*navIntervalWithError);
-                    for(int j = 0; j < lengthOfDay*60; j+=navIntervalWithErrorMin){
-                        if(ui->noiseCheckBox->isChecked()){
-                            NError = getNorthError(currentTime, currentOkta, z);
-                            double navError = getNavigationIntervalError(navigationInterval);
-                            navIntervalWithError = (double)navigationInterval + navError;
-                            navIntervalWithErrorMin = qRound(60*navIntervalWithError);
-                            counter = 0;
-                        }
-                        if(!ui->noiseCheckBox->isChecked()){
-                            NError = getNorthError(currentTime, currentOkta, z);
-                        }
-                        if(NError != -999){
-                            //                        sumNELengthX += cos(NError*M_PI/180.0);
-                            //                        sumNELengthY += sin(NError*M_PI/180.0);
-                            QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime),
-                                                                         navIntervalWithErrorMin);
-                            unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
-                            endpointVector += unitStepVector;
-                            QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
-                            double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
+                    for(int j = 0; j < lengthOfDay*60; j++){
+                        if(counter%navIntervalWithErrorMin == 0){
+                            if(ui->noiseCheckBox->isChecked()){
+                                NError = getNorthError(currentTime, currentOkta, z);
+                                double navError = getNavigationIntervalError(navigationInterval);
+                                navIntervalWithError = (double)navigationInterval + navError;
+                                navIntervalWithErrorMin = qRound(60*navIntervalWithError);
+                                counter = 0;
+                            }
+                            if(!ui->noiseCheckBox->isChecked()){
+                                NError = getNorthError(currentTime, currentOkta, z);
+                                counter = 0;
+                            }
+                            if(NError != -999){
+                                //                        sumNELengthX += cos(NError*M_PI/180.0);
+                                //                        sumNELengthY += sin(NError*M_PI/180.0);
+                                QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime),
+                                                                             navIntervalWithErrorMin);
+                                unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
+                                endpointVector += unitStepVector;
+                                QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
+                                double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
 
-                            //                        if(sumNELengthY > 0)
-                            //                            resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
-                            //                        else
-                            //                            resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+                                //                        if(sumNELengthY > 0)
+                                //                            resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
+                                //                        else
+                                //                            resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
 
-                            //                        resNEList.append(resultedNError);
-                            //                        minDistList.append(minDist);
+                                //                        resNEList.append(resultedNError);
+                                //                        minDistList.append(minDist);
 
-                            if(!relativeContAreaPoints.isEmpty() && minDist < 30 && success == false){
-                                foreach(QPointF currentPixel, relativeContAreaPoints){
-                                    if(qRound(currentPixel.x()*background.width()) == qRound(unitStepPoint.x())
-                                            && qRound(currentPixel.y()*background.height()) == qRound(unitStepPoint.y())){
-                                        success = true;
-                                        break;
+                                if(!relativeContAreaPoints.isEmpty() && minDist < 30 && success == false){
+                                    foreach(QPointF currentPixel, relativeContAreaPoints){
+                                        if(qRound(currentPixel.x()*background.width()) == qRound(unitStepPoint.x())
+                                                && qRound(currentPixel.y()*background.height()) == qRound(unitStepPoint.y())){
+                                            success = true;
+                                            break;
+                                        }
                                     }
                                 }
+
+                                //                        qDebug("%f", minDist);
+
+
                             }
-
-                            //                        qDebug("%f", minDist);
-
-
+//                            if(i == 0 && j==0 && NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
+//                            else if(NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
                         }
-                        currentTime += navIntervalWithErrorMin;
-                        currentOkta += getGaussianRandomNumber(0,2, "cloud");
-                        if(currentOkta <= 0)
-                            currentOkta = 0;
-                        if(currentOkta >= 8)
-                            currentOkta = 8;
+                        currentTime++;
 
-                        counter += navIntervalWithErrorMin;
+                        if(j%60 == 0){
+                            currentOkta += getGaussianRandomNumber(0,2, "cloud");
+                            if(currentOkta <= 0)
+                                currentOkta = 0;
+                            if(currentOkta >= 8)
+                                currentOkta = 8;
+                        }
 
-                        //                    if(i == 0 && j==0 && NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), true);
-                        //                    else if(NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
+                        counter++;
                     }
                 }
 
