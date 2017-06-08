@@ -281,7 +281,8 @@ void SailingForm::drawUnitVectors(QImage &image, QColor &color, QList<QVector2D>
 
     for(int i = 1; i < vectorList.size(); i++){
         toCurrentVector += vectorList.at(i);
-        painter.drawLine(QPointF(shift.x() - fromCurrentVector.x(), fromCurrentVector.y() + shift.y()), QPointF(shift.x() - toCurrentVector.x(), toCurrentVector.y() + shift.y()));
+        painter.drawLine(QPointF(shift.x() - fromCurrentVector.x(), fromCurrentVector.y() + shift.y()),
+                         QPointF(shift.x() - toCurrentVector.x(), toCurrentVector.y() + shift.y()));
         sumdifflength += QVector2D(toCurrentVector-fromCurrentVector).length();
         fromCurrentVector += vectorList.at(i);
         sumLength+=vectorList.at(i).length();
@@ -387,7 +388,8 @@ double SailingForm::getMinDistance(QList<QPointF> &contourList, QPointF &current
     foreach(QPointF curr, contourList){
         curr.setX(curr.x()*image.width());
         curr.setY(curr.y()*image.height());
-        double dist = qSqrt((currentPoint.x()-curr.x())*(currentPoint.x()-curr.x()) + (currentPoint.y()-curr.y())*(currentPoint.y()-curr.y()));
+        double dist = qSqrt((currentPoint.x()-curr.x())*(currentPoint.x()-curr.x())
+                            + (currentPoint.y()-curr.y())*(currentPoint.y()-curr.y()));
         distList.append(dist);
     }
     qSort(distList.begin(), distList.end());
@@ -397,6 +399,8 @@ double SailingForm::getMinDistance(QList<QPointF> &contourList, QPointF &current
 
 void SailingForm::on_startPushButton_clicked()
 {
+    QString equsol, stone;
+    QString outName;
     QImage background(QSize(800, 600), QImage::Format_ARGB32);
     background.fill(Qt::white);
     QList<QPointF> backgroundPoints = contour.scaleDataToImage("../terkep.dat", background);
@@ -413,7 +417,8 @@ void SailingForm::on_startPushButton_clicked()
     QColor color;
     QPainter p2(&trajectoryImage);
 
-    double lengthOfVectorList = qAbs((trajectoryImage.width()/86.98)*(5.3 - (-67.989)) - (trajectoryImage.width()/86.98)*(-42.7 - (-67.989)));
+    double lengthOfVectorList = qAbs((trajectoryImage.width()/86.98)*(5.3 - (-67.989))
+                                     - (trajectoryImage.width()/86.98)*(-42.7 - (-67.989)));
     double blowDist = contour.blowDistance(6372797, 1000, 1000, 10); //needs to be scaled
     double blowDistPixel = blowDist*lengthOfVectorList/(distance*1000);
 
@@ -434,9 +439,18 @@ void SailingForm::on_startPushButton_clicked()
         QList<QVector2D> unitStepVectorList;
 
         int currentStone;
-        if(ui->calciteRadioButton->isChecked()) currentStone = 1;
-        if(ui->cordieriteRadioButton->isChecked()) currentStone = 2;
-        if(ui->tourmalineRadioButton->isChecked()) currentStone = 3;
+        if(ui->calciteRadioButton->isChecked()){
+            stone = "cal";
+            currentStone = 1;
+        }
+        if(ui->cordieriteRadioButton->isChecked()){
+            stone = "cord";
+            currentStone = 2;
+        }
+        if(ui->tourmalineRadioButton->isChecked()){
+            stone = "tour";
+            currentStone = 3;
+        }
 
         if(z==currentStone){
 
@@ -449,10 +463,12 @@ void SailingForm::on_startPushButton_clicked()
                 int currentTime, startingTime, lengthOfDay;
 
                 if(ui->solRadioButton->isChecked()){
+                    equsol = "sol";
                     startingTime = 3;
                     lengthOfDay = 17;
                 }
                 if(ui->equRadioButton->isChecked()){
+                    equsol = "equ";
                     startingTime = 6;
                     lengthOfDay = 11;
                 }
@@ -465,7 +481,8 @@ void SailingForm::on_startPushButton_clicked()
                 int navIntervalWithErrorMin;
                 //            double sumNELengthX = 0, sumNELengthY = 0;
                 QVector2D endpointVector;
-                QPointF shift = QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)), -1*(trajectoryImage.height()/33.59)*(61 - 83.599));
+                QPointF shift = QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)),
+                                        -1*(trajectoryImage.height()/33.59)*(61 - 83.599));
                 bool success = false;
                 //            QList<double> minDistList;
                 //            QList<double> resNEList;
@@ -490,7 +507,8 @@ void SailingForm::on_startPushButton_clicked()
                         if(NError != -999){
                             //                        sumNELengthX += cos(NError*M_PI/180.0);
                             //                        sumNELengthY += sin(NError*M_PI/180.0);
-                            QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime), navIntervalWithErrorMin);
+                            QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime),
+                                                                         navIntervalWithErrorMin);
                             unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
                             endpointVector += unitStepVector;
                             QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
@@ -506,7 +524,8 @@ void SailingForm::on_startPushButton_clicked()
 
                             if(!relativeContAreaPoints.isEmpty() && minDist < 30 && success == false){
                                 foreach(QPointF currentPixel, relativeContAreaPoints){
-                                    if(qRound(currentPixel.x()*background.width()) == qRound(unitStepPoint.x()) && qRound(currentPixel.y()*background.height()) == qRound(unitStepPoint.y())){
+                                    if(qRound(currentPixel.x()*background.width()) == qRound(unitStepPoint.x())
+                                            && qRound(currentPixel.y()*background.height()) == qRound(unitStepPoint.y())){
                                         success = true;
                                         break;
                                     }
@@ -570,7 +589,8 @@ void SailingForm::on_startPushButton_clicked()
             QPainter painter(&trajectoryImage);
             painter.setPen(Qt::magenta);
             for(int i = 0; i < relativeContourPoints.size(); i++){
-                contImage.setPixelColor(QPoint(qRound(relativeContourPoints.at(i).x()*background.width()), qRound(relativeContourPoints.at(i).y()*background.height())), Qt::blue);
+                contImage.setPixelColor(QPoint(qRound(relativeContourPoints.at(i).x()*background.width()),
+                                               qRound(relativeContourPoints.at(i).y()*background.height())), Qt::blue);
                 if(i < contourPoints.size()-1){
                     //            background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
                     painter.drawLine(contourPoints.at(i), contourPoints.at(i+1));
@@ -579,14 +599,19 @@ void SailingForm::on_startPushButton_clicked()
             painter.drawImage(0, 0, contImage);
             painter.end();
 
+            ui->trajectoryGraphicsView->scene()->clear();
+            ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
+
+            //    MessageDialog messDialog("Simulation ready");
+            //    messDialog.exec();
+
+            outName = "trajectory_" + stone + "_" + equsol + "_" + "speed" + QString::number(ui->speedDoubleSpinBox->value()) + "_"
+                    + "days" + QString::number(ui->simLengthSpinBox->value()) + "_" + "navperiodicity"
+                    + QString::number(ui->hourIntervalSpinBox->value())
+                    + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + ".png";
+
         }
     }
+    trajectoryImage.save(outName);
 
-    ui->trajectoryGraphicsView->scene()->clear();
-    ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
-
-    //    MessageDialog messDialog("Simulation ready");
-    //    messDialog.exec();
-
-    trajectoryImage.save("trajectory.png");
 }
