@@ -504,6 +504,9 @@ void SailingForm::on_startPushButton_clicked()
                 //            QList<double> minDistList;
                 //            QList<double> resNEList;
 
+                QPointF rescaledShift = contour.rescaleDataToMapPoints(shift);
+                outStream << QString::number(rescaledShift.x()) << "\t" << QString::number(rescaledShift.y()) << "\n";
+
                 for(int k = 0; k < ui->simLengthSpinBox->value(); k++){
                     int counter = 0;
                     currentTime = startingTime*60;
@@ -528,11 +531,15 @@ void SailingForm::on_startPushButton_clicked()
                                 //                        sumNELengthY += sin(NError*M_PI/180.0);
                                 QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime),
                                                                              navIntervalWithErrorMin);
-                                unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
                                 endpointVector += unitStepVector;
                                 QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
-                                QPointF rescaledPoint = contour.rescaleDataToMapPoints(unitStepPoint);
-                                outStream << QString::number(rescaledPoint.x()) << "\t" << QString::number(rescaledPoint.y()) << "\n";
+
+                                if(success == false){
+                                    unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
+                                    QPointF rescaledPoint = contour.rescaleDataToMapPoints(unitStepPoint);
+                                    outStream << QString::number(rescaledPoint.x()) << "\t" << QString::number(rescaledPoint.y()) << "\n";
+                                }
+
                                 double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
 
                                 //                        if(sumNELengthY > 0)
