@@ -343,8 +343,8 @@ void SailingForm::fitImage(QImage &image, QGraphicsView *view)
 double SailingForm::getNavigationIntervalError(int interval)
 {
     double error = (1.0/6.0)*(double)interval;
-//    double result = (double)getUniformRandomNumber(0, qRound(error*60))/60.0;
-    double result = error;
+    double result = (double)getUniformRandomNumber(0, qRound(error*60))/60.0;
+//    double result = error;
     int rand = getUniformRandomNumber(0,1);
     if(rand == 0) return result;
     if(rand == 1) return -1*result;
