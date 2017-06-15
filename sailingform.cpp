@@ -270,7 +270,10 @@ void SailingForm::drawUnitVectors(QImage &image, QColor &color, QList<QVector2D>
     pen.setColor(color);
     painter.setPen(pen);
 
-    painter.drawLine(QPointF(shift.x(), shift.y()), QPointF(shift.x() - vectorList.at(0).x(), vectorList.at(0).y() + shift.y()));
+    if(!ui->reverseCheckBox->isChecked())
+        painter.drawLine(QPointF(shift.x(), shift.y()), QPointF(shift.x() - vectorList.at(0).x(), vectorList.at(0).y() + shift.y()));
+    if(ui->reverseCheckBox->isChecked())
+        painter.drawLine(QPointF((image.width()/86.98)*(-42.7 - (-67.989)), shift.y()), QPointF((image.width()/86.98)*(-42.7 - (-67.989)) + vectorList.at(0).x(), vectorList.at(0).y() + shift.y()));
 
     QVector2D fromCurrentVector = vectorList.at(0);
     QVector2D toCurrentVector = vectorList.at(0);
@@ -281,8 +284,12 @@ void SailingForm::drawUnitVectors(QImage &image, QColor &color, QList<QVector2D>
 
     for(int i = 1; i < vectorList.size(); i++){
         toCurrentVector += vectorList.at(i);
-        painter.drawLine(QPointF(shift.x() - fromCurrentVector.x(), fromCurrentVector.y() + shift.y()),
-                         QPointF(shift.x() - toCurrentVector.x(), toCurrentVector.y() + shift.y()));
+        if(!ui->reverseCheckBox->isChecked())
+            painter.drawLine(QPointF(shift.x() - fromCurrentVector.x(), fromCurrentVector.y() + shift.y()),
+                             QPointF(shift.x() - toCurrentVector.x(), toCurrentVector.y() + shift.y()));
+        if(ui->reverseCheckBox->isChecked())
+            painter.drawLine(QPointF((image.width()/86.98)*(-42.7 - (-67.989)) + fromCurrentVector.x(), fromCurrentVector.y() + shift.y()),
+                             QPointF((image.width()/86.98)*(-42.7 - (-67.989)) + toCurrentVector.x(), toCurrentVector.y() + shift.y()));
         sumdifflength += QVector2D(toCurrentVector-fromCurrentVector).length();
         fromCurrentVector += vectorList.at(i);
         sumLength+=vectorList.at(i).length();
@@ -470,10 +477,17 @@ void SailingForm::on_startPushButton_clicked()
                 lengthOfDay = 11;
             }
 
-            QString filename = "trajectory_" + stone + "_" + equsol + "_" + "speed" + QString::number(ui->speedDoubleSpinBox->value()) + "_"
-                    + "days" + QString::number(ui->simLengthSpinBox->value()) + "_" + "navperiodicity"
-                    + QString::number(ui->hourIntervalSpinBox->value())
-                    + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + ".csv";
+            QString filename;
+            if(!ui->reverseCheckBox->isChecked())
+                filename = "trajectory_" + stone + "_" + equsol + "_" + "speed" + QString::number(ui->speedDoubleSpinBox->value()) + "_"
+                        + "days" + QString::number(ui->simLengthSpinBox->value()) + "_" + "navperiodicity"
+                        + QString::number(ui->hourIntervalSpinBox->value())
+                        + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + ".csv";
+            if(ui->reverseCheckBox->isChecked())
+                filename = "trajectory_" + stone + "_" + equsol + "_" + "speed" + QString::number(ui->speedDoubleSpinBox->value()) + "_"
+                        + "days" + QString::number(ui->simLengthSpinBox->value()) + "_" + "navperiodicity"
+                        + QString::number(ui->hourIntervalSpinBox->value())
+                        + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + "_reverse.csv";
             QFile outFile(filename);
 
             if(!outFile.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -534,8 +548,13 @@ void SailingForm::on_startPushButton_clicked()
                                 endpointVector += unitStepVector;
                                 QPointF unitStepPoint(shift.x() - endpointVector.x(), endpointVector.y() + shift.y());
 
-                                if(success == false){
+                                if(success == false && !ui->reverseCheckBox->isChecked()){
                                     unitStepVectorList.append(unitStepVector); //((double)ui->simLengthSpinBox->value()*17)))); when according sailing days
+                                    QPointF rescaledPoint = contour.rescaleDataToMapPoints(unitStepPoint);
+                                    outStream << QString::number(rescaledPoint.x()) << "\t" << QString::number(rescaledPoint.y()) << "\n";
+                                }
+                                if(ui->reverseCheckBox->isChecked()){
+                                    unitStepVectorList.append(unitStepVector);
                                     QPointF rescaledPoint = contour.rescaleDataToMapPoints(unitStepPoint);
                                     outStream << QString::number(rescaledPoint.x()) << "\t" << QString::number(rescaledPoint.y()) << "\n";
                                 }
@@ -604,7 +623,12 @@ void SailingForm::on_startPushButton_clicked()
                 }
 
                 if(!unitStepVectorList.isEmpty()){
-                    drawUnitVectors(trajectoryImage, color, unitStepVectorList, shift);
+                    if(!ui->reverseCheckBox->isChecked())
+                        drawUnitVectors(trajectoryImage, color, unitStepVectorList, shift);
+                    if(ui->reverseCheckBox->isChecked()){
+                        color = Qt::green;
+                        drawUnitVectors(trajectoryImage, color, unitStepVectorList, shift);
+                    }
                 }
                 //            if(resultedNError > -999) addToList("result: " + QString::number(resultedNError), false);
                 addToList("run: " + QString::number(i+1), true);
@@ -636,10 +660,16 @@ void SailingForm::on_startPushButton_clicked()
             //    MessageDialog messDialog("Simulation ready");
             //    messDialog.exec();
 
-            outName = "trajectory_" + stone + "_" + equsol + "_" + "speed" + QString::number(ui->speedDoubleSpinBox->value()) + "_"
-                    + "days" + QString::number(ui->simLengthSpinBox->value()) + "_" + "navperiodicity"
-                    + QString::number(ui->hourIntervalSpinBox->value())
-                    + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + ".png";
+            if(!ui->reverseCheckBox->isChecked())
+                outName = "trajectory_" + stone + "_" + equsol + "_" + "speed" + QString::number(ui->speedDoubleSpinBox->value()) + "_"
+                        + "days" + QString::number(ui->simLengthSpinBox->value()) + "_" + "navperiodicity"
+                        + QString::number(ui->hourIntervalSpinBox->value())
+                        + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + ".png";
+            if(ui->reverseCheckBox->isChecked())
+                outName = "trajectory_" + stone + "_" + equsol + "_" + "speed" + QString::number(ui->speedDoubleSpinBox->value()) + "_"
+                        + "days" + QString::number(ui->simLengthSpinBox->value()) + "_" + "navperiodicity"
+                        + QString::number(ui->hourIntervalSpinBox->value())
+                        + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + "_reverse.png";
 
             outFile.close();
         }
