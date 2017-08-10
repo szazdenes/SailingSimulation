@@ -418,8 +418,8 @@ void SailingForm::on_startPushButton_clicked()
     }
 
     QImage trajectoryImage(background.size(), QImage::Format_ARGB32);
-    QImage contourImage("../cont_calib.png");
-    QImage contAreaImage("../cont_calib_filled.png");
+    QImage contourImage("../cont_calib_21m.png");
+    QImage contAreaImage("../cont_calib_filled_21m.png");
     QImage contImage(background.size(), QImage::Format_ARGB32);
     trajectoryImage.fill(Qt::white);
     contImage.fill(Qt::transparent);
@@ -428,11 +428,11 @@ void SailingForm::on_startPushButton_clicked()
 
     double lengthOfVectorList = qAbs((trajectoryImage.width()/86.98)*(5.3 - (-67.989))
                                      - (trajectoryImage.width()/86.98)*(-42.7 - (-67.989)));
-    double blowDist = contour.blowDistance(6372797, 1000, 1000, 10); //needs to be scaled
-    double blowDistPixel = blowDist*lengthOfVectorList/(distance*1000);
+//    double blowDist = contour.blowDistance(6372797, 1000, 1000, 21); //needs to be scaled
+//    double blowDistPixel = blowDist*lengthOfVectorList/(distance*1000);
 
     QList<QPointF> contourPoints = contour.scaleContour("../contour.dat", background);
-    //    QList<QPointF> blownContour = contour.blowUpContour(contourPoints, blowDistPixel, background);
+//    QList<QPointF> blownContour = contour.blowUpContour(contourPoints, blowDistPixel, background);
     QList<QPointF> relativeContourPoints = contour.getRelativeContourPositions(contourImage);
     QList<QPointF> relativeContAreaPoints = contour.getRelativeContourPositions(contAreaImage);
 
@@ -494,7 +494,6 @@ void SailingForm::on_startPushButton_clicked()
                 qDebug("baj");
             QTextStream outStream(&outFile);
 
-            //        double resultedNError = -999;
             double good = 0, wrong = 0;
             for(int i = 0; i < ui->numOfRunsSpinBox->value(); i++){
                 unitStepVectorList.clear();
@@ -510,13 +509,11 @@ void SailingForm::on_startPushButton_clicked()
                 int navigationInterval;
                 double navIntervalWithError;
                 int navIntervalWithErrorMin;
-                //            double sumNELengthX = 0, sumNELengthY = 0;
+
                 QVector2D endpointVector;
                 QPointF shift = QPointF((trajectoryImage.width()/86.98)*(5.3 - (-67.989)),
                                         -1*(trajectoryImage.height()/33.59)*(61 - 83.599));
                 bool success = false;
-                //            QList<double> minDistList;
-                //            QList<double> resNEList;
 
                 QPointF rescaledShift = contour.rescaleDataToMapPoints(shift);
                 outStream << QString::number(rescaledShift.x()) << "\t" << QString::number(rescaledShift.y()) << "\n";
@@ -541,8 +538,6 @@ void SailingForm::on_startPushButton_clicked()
                                 counter = 0;
                             }
                             if(NError != -999){
-                                //                        sumNELengthX += cos(NError*M_PI/180.0);
-                                //                        sumNELengthY += sin(NError*M_PI/180.0);
                                 QVector2D unitStepVector = getUnitStepVector(NError, (lengthOfVectorList/voyageTime),
                                                                              navIntervalWithErrorMin);
                                 endpointVector += unitStepVector;
@@ -561,14 +556,6 @@ void SailingForm::on_startPushButton_clicked()
 
                                 double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
 
-                                //                        if(sumNELengthY > 0)
-                                //                            resultedNError = acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
-                                //                        else
-                                //                            resultedNError = -1*acos(sumNELengthX/(sqrt(sumNELengthX*sumNELengthX + sumNELengthY*sumNELengthY)))*180.0/M_PI;
-
-                                //                        resNEList.append(resultedNError);
-                                //                        minDistList.append(minDist);
-
                                 if(!relativeContAreaPoints.isEmpty() && minDist < 30 && success == false){
                                     foreach(QPointF currentPixel, relativeContAreaPoints){
                                         if(qRound(currentPixel.x()*background.width()) == qRound(unitStepPoint.x())
@@ -578,13 +565,7 @@ void SailingForm::on_startPushButton_clicked()
                                         }
                                     }
                                 }
-
-                                //                        qDebug("%f", minDist);
-
-
                             }
-//                            if(i == 0 && j==0 && NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
-//                            else if(NError != -999) addToList("elev: " + QString::number(elevation) + "\t" + "okta: " + QString::number(currentOkta) + "\t" + "NError: " + QString::number(NError), false);
                         }
                         currentTime++;
 
@@ -599,19 +580,6 @@ void SailingForm::on_startPushButton_clicked()
                         counter++;
                     }
                 }
-
-                //            if(!minDistList.isEmpty()){
-                //                QList<double> sortedMinDistList = minDistList;
-                //                qSort(sortedMinDistList.begin(), sortedMinDistList.end());
-                //                double minDistMin = sortedMinDistList.first();
-                //                double resNE = resNEList.at(minDistList.indexOf(minDistMin));
-
-                //                if(minDistMin < 5 && resNE > -5 && success == false){
-                //                    success = true;
-                //                    qDebug("success: %f %f", minDistMin, resNE);
-                //                }
-                //                qDebug("%f %f", minDistMin, resNE);
-                //            }
 
                 if(!success){
                     color = Qt::red;
@@ -630,7 +598,6 @@ void SailingForm::on_startPushButton_clicked()
                         drawUnitVectors(trajectoryImage, color, unitStepVectorList, shift);
                     }
                 }
-                //            if(resultedNError > -999) addToList("result: " + QString::number(resultedNError), false);
                 addToList("run: " + QString::number(i+1), true);
                 QApplication::processEvents();
             }
@@ -648,13 +615,15 @@ void SailingForm::on_startPushButton_clicked()
                     contImage.setPixelColor(QPoint(qRound(relativeContourPoints.at(i).x()*background.width()),
                                                qRound(relativeContourPoints.at(i).y()*background.height())), Qt::blue);
                 if(i < contourPoints.size()-1){
-                    //            background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
+//                    background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
                     if(!ui->reverseCheckBox->isChecked())
                         painter.drawLine(contourPoints.at(i), contourPoints.at(i+1));
                 }
             }
             painter.drawImage(0, 0, contImage);
             painter.end();
+
+//            background.save("background.png");
 
             ui->trajectoryGraphicsView->scene()->clear();
             ui->trajectoryGraphicsView->scene()->addPixmap(QPixmap::fromImage(trajectoryImage));
