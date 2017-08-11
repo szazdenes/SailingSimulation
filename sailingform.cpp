@@ -188,6 +188,145 @@ double SailingForm::getNorthError(int time, int okta, int num)
     return northError;
 }
 
+double SailingForm::getRandomNorthError(int time, int okta, int num)
+{
+    QString stone, equ_sol, am_pm;
+    QMap<int, double> elevationMap, roundedElevationMap;
+
+    if(ui->solRadioButton->isChecked()){
+        equ_sol = "sol";
+        if(ui->calciteRadioButton->isChecked() && num==1){
+            stone = "cal";
+            if((double)time/60.0 < 12)
+                am_pm = "am";
+            if((double)time/60.0 > 12)
+                am_pm = "pm";
+            if((double)time/60.0 == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    am_pm = "am";
+                if(randNum == 1)
+                    am_pm = "pm";
+            }
+        }
+        else if(ui->cordieriteRadioButton->isChecked() && num==2){
+            stone = "cord";
+            if((double)time/60.0 < 12)
+                am_pm = "am";
+            if((double)time/60.0 > 12)
+                am_pm = "pm";
+            if((double)time/60.0 == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    am_pm = "am";
+                if(randNum == 1)
+                    am_pm = "pm";
+            }
+        }
+        else if(ui->tourmalineRadioButton->isChecked() && num==3){
+            stone = "tour";
+            if((double)time/60.0 < 12)
+                am_pm = "am";
+            if((double)time/60.0 > 12)
+                am_pm = "pm";
+            if((double)time/60.0 == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    am_pm = "am";
+                if(randNum == 1)
+                    am_pm = "pm";
+            }
+        }
+        else
+            return -999;
+        elevationMap = getTimeElevationMap("../elevation_Bergen_sol.dat");
+    }
+
+    if(ui->equRadioButton->isChecked()){
+        equ_sol = "equ";
+        if(ui->calciteRadioButton->isChecked() && num==1){
+            stone = "cal";
+            if((double)time/60.0 < 12)
+                am_pm = "am";
+            if((double)time/60.0 > 12)
+                am_pm = "pm";
+            if((double)time/60.0 == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    am_pm = "am";
+                if(randNum == 1)
+                    am_pm = "pm";
+            }
+        }
+
+        else if(ui->cordieriteRadioButton->isChecked() && num==2){
+            stone = "cord";
+            if((double)time/60.0 < 12)
+                am_pm = "am";
+            if((double)time/60.0 > 12)
+                am_pm = "pm";
+            if((double)time/60.0 == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    am_pm = "am";
+                if(randNum == 1)
+                    am_pm = "pm";
+            }
+        }
+
+        else if(ui->tourmalineRadioButton->isChecked() && num==3){
+            stone = "tour";
+            if((double)time/60.0 < 12)
+                am_pm = "am";
+            if((double)time/60.0 > 12)
+                am_pm = "pm";
+            if((double)time/60.0 == 12){
+                int randNum = getUniformRandomNumber(0,1);
+                if(randNum == 0)
+                    am_pm = "am";
+                if(randNum == 1)
+                    am_pm = "pm";
+            }
+        }
+        else
+            return -999;
+        elevationMap = getTimeElevationMap("../elevation_Bergen_equ.dat");
+    }
+
+    foreach(int key, elevationMap.keys()){
+        if(ui->solRadioButton->isChecked() && qRound(elevationMap[key]) >= 50)
+            roundedElevationMap[key] = 50.0;
+        else if(ui->equRadioButton->isChecked() && qRound(elevationMap[key]) >= 25)
+            roundedElevationMap[key] = 25.0;
+        else
+            roundedElevationMap[key] = qRound(elevationMap[key]);
+    }
+
+    int roundedElevation;
+    if(roundedElevationMap[qRound((double)time/60.0)] >= 0.0 && roundedElevationMap[qRound((double)time/60.0)] <= 5.0)
+        roundedElevation = 5;
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 5 && roundedElevationMap[qRound((double)time/60.0)] <= 10)
+        roundedElevation = 10;
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 10 && roundedElevationMap[qRound((double)time/60.0)] <= 15)
+        roundedElevation = 15;
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 15 && roundedElevationMap[qRound((double)time/60.0)] <= 20)
+        roundedElevation = 20;
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 20 && roundedElevationMap[qRound((double)time/60.0)] <= 25)
+        roundedElevation = 25;
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 25 && roundedElevationMap[qRound((double)time/60.0)] <= 30)
+        roundedElevation = 30;
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 30 && roundedElevationMap[qRound((double)time/60.0)] <= 35)
+        roundedElevation = 35;
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 35 && roundedElevationMap[qRound((double)time/60.0)] <= 40)
+        roundedElevation = 40;
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 40 && roundedElevationMap[qRound((double)time/60.0)] <= 45)
+        roundedElevation = 45;
+    else if(roundedElevationMap[qRound((double)time/60.0)] > 45 && roundedElevationMap[qRound((double)time/60.0)] <= 50)
+        roundedElevation = 50;
+    else
+        return -999;
+}
+
 QMap<int, double> SailingForm::getTimeElevationMap(QString filename)
 {
     QFile file(filename);

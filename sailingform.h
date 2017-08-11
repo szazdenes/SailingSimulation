@@ -31,6 +31,7 @@ private:
     Ui::SailingForm *ui;
     QVector2D getUnitStepVector(double Nerror, double speed, double navIntervalMin);
     double getNorthError(int time, int okta, int num);
+    double getRandomNorthError(int time, int okta, int num);
     QMap<int, double> getTimeElevationMap(QString filename);
     int getGaussianRandomNumber(double mu, double sigma, QString mode);
     int getUniformRandomNumber(int low, int high);
