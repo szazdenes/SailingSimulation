@@ -585,8 +585,6 @@ double SailingForm::getValueFromFile(QString dirName, QString fileName)
 
 void SailingForm::on_startPushButton_clicked()
 {
-    getRandomNorthError(10, 5, 1);
-
     QString equsol, stone;
     QString outName;
     QImage background(QSize(800, 600), QImage::Format_ARGB32);
