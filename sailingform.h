@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <random>
 #include <QGraphicsView>
+#include <QDebug>
 
 #include "messagedialog.h"
 #include "contourrecognition.h"
@@ -42,6 +43,7 @@ private:
     void selectVikingRoute(QString inpath, QString outpath);
     void addToList(QString string, bool clear);
     double getMinDistance(QList<QPointF> &contourList, QPointF &currentPoint, QImage &image);
+    double getValueFromFile(QString dirName, QString fileName);
 
     double distance;
     QGraphicsScene scene1, scene2;

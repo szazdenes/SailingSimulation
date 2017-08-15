@@ -14,6 +14,8 @@ SailingForm::SailingForm(QWidget *parent) :
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "Good" << "Wrong" << "Success (%)");
 
+
+
 }
 
 SailingForm::~SailingForm()
@@ -325,6 +327,16 @@ double SailingForm::getRandomNorthError(int time, int okta, int num)
         roundedElevation = 50;
     else
         return -999;
+
+    QDir folder = "../situations/" + QString::number(roundedElevation) + "_" + QString::number(okta);
+    QStringList fileList = folder.entryList(QStringList("*_" + equ_sol + "_" + am_pm + "_" + stone + "*"), QDir::Files | QDir::NoDotAndDotDot);
+
+    QString randomFileName = fileList.at(qrand() % fileList.size());
+
+    double randomNorthError = getValueFromFile(folder.absolutePath(), randomFileName);
+
+    return randomNorthError;
+
 }
 
 QMap<int, double> SailingForm::getTimeElevationMap(QString filename)
@@ -545,8 +557,36 @@ double SailingForm::getMinDistance(QList<QPointF> &contourList, QPointF &current
     return minDist;
 }
 
+double SailingForm::getValueFromFile(QString dirName, QString fileName)
+{
+    QFile file(dirName + "/" + fileName);
+    QList<double> northList;
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+            qDebug("Opening error.");
+    }
+    QTextStream read(&file);
+    double value, count;
+    while(!read.atEnd()){
+        if(!read.readLine().startsWith("#")){
+            QString line = read.readLine();
+            QTextStream lineStream(&line);
+            lineStream >> value >> count;
+            for(int i = 0; i < (int)count; i++)
+                northList.append(value);
+        }
+    }
+
+    std::random_shuffle(northList.begin(), northList.end());
+    double result = northList.at(qrand() % northList.size());
+
+    return result;
+
+}
+
 void SailingForm::on_startPushButton_clicked()
 {
+    getRandomNorthError(10, 5, 1);
+
     QString equsol, stone;
     QString outName;
     QImage background(QSize(800, 600), QImage::Format_ARGB32);
@@ -666,14 +706,14 @@ void SailingForm::on_startPushButton_clicked()
                     for(int j = 0; j < lengthOfDay*60; j++){
                         if(counter%navIntervalWithErrorMin == 0){
                             if(ui->noiseCheckBox->isChecked()){
-                                NError = getNorthError(currentTime, currentOkta, z);
+                                NError = getRandomNorthError(currentTime, currentOkta, z);
                                 double navError = getNavigationIntervalError(navigationInterval);
                                 navIntervalWithError = (double)navigationInterval + navError;
                                 navIntervalWithErrorMin = qRound(60*navIntervalWithError);
                                 counter = 0;
                             }
                             if(!ui->noiseCheckBox->isChecked()){
-                                NError = getNorthError(currentTime, currentOkta, z);
+                                NError = getRandomNorthError(currentTime, currentOkta, z);
                                 counter = 0;
                             }
                             if(NError != -999){
@@ -705,6 +745,7 @@ void SailingForm::on_startPushButton_clicked()
                                     }
                                 }
                             }
+                            QApplication::processEvents();
                         }
                         currentTime++;
 
