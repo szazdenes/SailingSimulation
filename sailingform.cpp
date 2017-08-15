@@ -622,13 +622,13 @@ void SailingForm::on_startPushButton_clicked()
 
     double voyageTime = distance/ui->speedDoubleSpinBox->value();
 
-    int startingTime, lengthOfDay;
+    int startingTime = -999, lengthOfDay = -999;
 
     for (int z = 1; z <= 3; z++){
 
         QList<QVector2D> unitStepVectorList;
 
-        int currentStone;
+        int currentStone = 0;
         if(ui->calciteRadioButton->isChecked()){
             stone = "cal";
             currentStone = 1;
@@ -684,7 +684,7 @@ void SailingForm::on_startPushButton_clicked()
 
                 currentOkta = firstOkta;
 
-                double NError;
+                double NError = -999;
                 int navigationInterval;
                 double navIntervalWithError;
                 int navIntervalWithErrorMin;
