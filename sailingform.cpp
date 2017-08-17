@@ -7,6 +7,10 @@ SailingForm::SailingForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
+
+
+
+
     ui->trajectoryGraphicsView->setScene(&scene1);
 
     distance = 2720; //km
@@ -410,7 +414,10 @@ int SailingForm::getGaussianRandomNumber(double mu, double sigma, QString mode) 
 
 int SailingForm::getUniformRandomNumber(int low, int high)
 {
-    return qrand() % ((high + 1) - low) + low;
+    boost::uniform_int<> range(low, high);
+    boost::variate_generator< RNGType, boost::uniform_int<> > dice(rng, range);
+
+    return dice();
 }
 
 void SailingForm::drawUnitVectors(QImage &image, QColor &color, QList<QVector2D> &vectorList, QPointF shift)
@@ -577,7 +584,16 @@ double SailingForm::getValueFromFile(QString dirName, QString fileName)
     }
 
     std::random_shuffle(northList.begin(), northList.end());
-    double result = northList.at(qrand() % northList.size());
+
+    boost::uniform_int<> range(0, northList.size());
+    boost::variate_generator< RNGType, boost::uniform_int<> > dice(rng, range);
+
+    int randIndex = dice();
+    double result = northList.at(randIndex);
+
+//    qDebug("%d", northList.size());
+//    qDebug("%d", randIndex);
+//    qDebug("%f", result);
 
     return result;
 

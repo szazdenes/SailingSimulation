@@ -9,6 +9,8 @@
 #include <random>
 #include <QGraphicsView>
 #include <QDebug>
+#include <boost/random.hpp>
+#include <boost/generator_iterator.hpp>
 
 #include "messagedialog.h"
 #include "contourrecognition.h"
@@ -50,6 +52,9 @@ private:
     double sumLength;
     ContourRecognition contour;
     int elevation;
+
+    typedef boost::mt19937 RNGType;
+    RNGType rng;
 };
 
 #endif // SAILINGFORM_H
