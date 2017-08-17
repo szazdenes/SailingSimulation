@@ -567,8 +567,8 @@ double SailingForm::getValueFromFile(QString dirName, QString fileName)
     QTextStream read(&file);
     double value, count;
     while(!read.atEnd()){
-        if(!read.readLine().startsWith("#")){
-            QString line = read.readLine();
+        QString line = read.readLine();
+        if(!line.startsWith("#")){
             QTextStream lineStream(&line);
             lineStream >> value >> count;
             for(int i = 0; i < (int)count; i++)
