@@ -821,6 +821,23 @@ void SailingForm::on_startPushButton_clicked()
                         + "_" + "runs" + QString::number(ui->numOfRunsSpinBox->value()) + "_reverse.png";
 
             outFile.close();
+
+            QFile successFile("success.csv");
+            QTextStream successStream(&successFile);
+
+            if(successFile.exists()){
+                if(!successFile.open(QIODevice::Append | QIODevice::Text)){
+                    qDebug("Succesfile opening error.");
+                }
+            }
+            else{
+                if(!successFile.open(QIODevice::WriteOnly | QIODevice::Text)){
+                    qDebug("Succesfile opening error.");
+                }
+            }
+            successStream << equsol + "\t" + stone + "\t" + ui->hourIntervalSpinBox->text() + "\t" + ui->tableWidget->item(0,2)->text() + "\n";
+            successFile.close();
+
         }
     }
 
