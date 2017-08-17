@@ -731,9 +731,9 @@ void SailingForm::on_startPushButton_clicked()
                                     outStream << QString::number(rescaledPoint.x()) << "\t" << QString::number(rescaledPoint.y()) << "\n";
                                 }
 
-                                double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
+//                                double minDist = getMinDistance(relativeContourPoints, unitStepPoint, background);
 
-                                if(!relativeContAreaPoints.isEmpty() && minDist < 30 && success == false){
+                                if(!relativeContAreaPoints.isEmpty() /*&& minDist < 30*/ && success == false){
                                     foreach(QPointF currentPixel, relativeContAreaPoints){
                                         if(qRound(currentPixel.x()*background.width()) == qRound(unitStepPoint.x())
                                                 && qRound(currentPixel.y()*background.height()) == qRound(unitStepPoint.y())){
