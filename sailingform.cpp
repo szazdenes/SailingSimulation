@@ -787,16 +787,16 @@ void SailingForm::on_startPushButton_clicked()
             ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, 2, new QTableWidgetItem(QString::number(successNum)));
 
             QPainter painter(&trajectoryImage);
-            painter.setPen(Qt::magenta);
+//            painter.setPen(Qt::magenta);
             for(int i = 0; i < relativeContourPoints.size(); i++){
                 if(!ui->reverseCheckBox->isChecked())
                     contImage.setPixelColor(QPoint(qRound(relativeContourPoints.at(i).x()*background.width()),
                                                qRound(relativeContourPoints.at(i).y()*background.height())), Qt::blue);
-                if(i < contourPoints.size()-1){
-//                    background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
+                /*if(i < contourPoints.size()-1){
+                    background.setPixelColor(QPoint(qRound(blownContour.at(i).x()), qRound(blownContour.at(i).y())), Qt::magenta);
                     if(!ui->reverseCheckBox->isChecked())
                         painter.drawLine(contourPoints.at(i), contourPoints.at(i+1));
-                }
+                }*/
             }
             painter.drawImage(0, 0, contImage);
             painter.end();
